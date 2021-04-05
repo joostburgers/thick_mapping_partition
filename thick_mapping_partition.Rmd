@@ -1,0 +1,9 @@
+---
+author: "Johannes Burgers and Saanchi Ahuja"
+title: "Gendered Spaces, Partitioned Memories"
+output: html_notebook
+---
+
+### Introduction
+
+This is a stublet for the notebook
