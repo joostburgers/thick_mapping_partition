@@ -1,4 +1,5 @@
-# thick_mapping_partition
-second version of my repository
-This is supposed to act as an overview
-### I'm not sure what the markup looks like here.
+#Thick Mapping Partition
+## Johannes Burgers and Saanchi Ahuja
+
+###Introduction
+The following repository has been created to reproduce the research for the following paper:
