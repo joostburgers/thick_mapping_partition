@@ -1881,7 +1881,12 @@ document.addEventListener('DOMContentLoaded', function() {
           <li class="divider"></li>
         </ul>
         <nav role="navigation" id="toc">
-          
+          <ul>
+          <li><a href="#introduction">Introduction</a></li>
+          <li><a href="#part-1-priming-the-ner-extracted-data">Part 1: Priming the NER Extracted Data</a></li>
+          <li><a href="#part-2-geocoding">Part 2: Geocoding</a></li>
+          <li><a href="#part-3-statistical-overview">Part 3: Statistical Overview</a></li>
+          </ul>
         </nav>
         <ul class="authors">
           <li class="divider"></li>
@@ -1913,12 +1918,12 @@ document.addEventListener('DOMContentLoaded', function() {
       
    
 <!-- Don't indent these lines or it will mess pre blocks indentation --> 
-<div id="introduction" class="section level3">
-<h3>Introduction</h3>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
 <p>The documentation below is the white paper for the essay: “Partitioned Narratives: Thick Mapping the <em>1947 Partition Archive</em>.” It includes the R code and csv files necessary to reproduce the calculations. Some of the spatial manipulations were performed in QGIS 3.16 (Hanover). When possible, images and Python code chunks have provided for reproduceability. Some steps involved converting CSV files to Geopackage files, as this is a common GIS workflow it has been skipped.</p>
 </div>
-<div id="part-1-priming-the-ner-extracted-data" class="section level3">
-<h3>Part 1: Priming the NER Extracted Data</h3>
+<div id="part-1-priming-the-ner-extracted-data" class="section level2">
+<h2>Part 1: Priming the NER Extracted Data</h2>
 <div id="load-packages" class="section level4">
 <h4>Load packages</h4>
 <p>The following packages: <code>tidyverse</code>, <code>tidygeocoder</code>,<code>tidytext</code>,<code>stringi</code>,<code>htmlTable</code>, are necessary to run this script.</p>
@@ -1935,7 +1940,13 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <div id="reformat-partition_df" class="section level4">
 <h4>Reformat <code>partition_df</code></h4>
-<p>The following procedure primes the data for analysis: - An address field is created by uniting the location, city, and country field - Remove unnecessary strings from data fields - Drop unnecessary columns - Keep all distinct addresses by person name. This prevents double counting locations in a person’s account.</p>
+<p>The following procedure primes the data for analysis:</p>
+<ul>
+<li>An address field is created by uniting the location, city, and country field</li>
+<li>Remove unnecessary strings from data fields</li>
+<li>Drop unnecessary columns</li>
+<li>Keep all distinct addresses by person name. This prevents double counting locations in a person’s account</li>
+</ul>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>partition_distinct_locations &lt;-<span class="st">  </span>partition_df <span class="op">%&gt;%</span></span>
 <span id="cb3-2"><a href="#cb3-2"></a><span class="st">  </span><span class="kw">group_by</span>(name) <span class="op">%&gt;%</span></span>
 <span id="cb3-3"><a href="#cb3-3"></a><span class="st">  </span><span class="co">#create address field from locations, city, and country columns</span></span>
@@ -1950,14 +1961,14 @@ document.addEventListener('DOMContentLoaded', function() {
 <span id="cb3-12"><a href="#cb3-12"></a>    <span class="dt">migrated_to =</span> <span class="kw">str_remove</span>(migrated_to, <span class="st">&quot;Migrated to: &quot;</span>),</span>
 <span id="cb3-13"><a href="#cb3-13"></a>  ) <span class="op">%&gt;%</span></span>
 <span id="cb3-14"><a href="#cb3-14"></a><span class="st">  </span><span class="co">#drop unnecessary columns</span></span>
-<span id="cb3-15"><a href="#cb3-15"></a><span class="st">  </span><span class="kw">select</span>(name<span class="op">:</span>migrated_to, summary<span class="op">:</span>address) <span class="op">%&gt;%</span></span>
+<span id="cb3-15"><a href="#cb3-15"></a><span class="st">  </span><span class="kw">select</span>(name<span class="op">:</span>migrated_to, gender<span class="op">:</span>address) <span class="op">%&gt;%</span></span>
 <span id="cb3-16"><a href="#cb3-16"></a><span class="st">  </span><span class="co">#keep all distinct addresses. This helps reduce the query time for the geocoder.</span></span>
 <span id="cb3-17"><a href="#cb3-17"></a><span class="st">  </span><span class="kw">distinct</span>(address, <span class="dt">.keep_all =</span> <span class="ot">TRUE</span>) <span class="op">%&gt;%</span></span>
 <span id="cb3-18"><a href="#cb3-18"></a><span class="st">  </span><span class="kw">ungroup</span>()</span></code></pre></div>
 </div>
 </div>
-<div id="part-2-geocoding" class="section level3">
-<h3>Part 2: Geocoding</h3>
+<div id="part-2-geocoding" class="section level2">
+<h2>Part 2: Geocoding</h2>
 <div id="find-distinct-addresses" class="section level4">
 <h4>Find distinct addresses</h4>
 <p>The geocoding the addresses can be quite time consuming. To save time, we can run only the distinct addresses and then join these back to <code>partition_distinct_locations</code> afterwards.</p>
@@ -1967,8 +1978,42 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <div id="run-geocoder" class="section level4">
 <h4>Run geocoder</h4>
-<p>The script relies on the <code>tidygeocoder</code> package developed by Jesse Cambon, Diego Hernangómez, Christopher Belanger, Daniel Possenriede: (<a href="https://jessecambon.github.io/tidygeocoder/index.html" class="uri">https://jessecambon.github.io/tidygeocoder/index.html</a>) The package allows users to select the geocoder of their choice. For the purposes of easy reproduceability OpenStreetMap (<code>osm</code>) was selected, though other services that require usernames might be more accurate.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co">#geo_partition &lt;- geo(addresses$address, method = &#39;osm&#39;, full_results = FALSE)</span></span></code></pre></div>
+<p>The script relies on the <code>tidygeocoder</code> package developed by Jesse Cambon, Diego Hernangómez, Christopher Belanger, Daniel Possenriede: (<a href="https://jessecambon.github.io/tidygeocoder/index.html" class="uri">https://jessecambon.github.io/tidygeocoder/index.html</a>) The package allows users to select the geocoder of their choice. For the purposes of easy reproduceability OpenStreetMap (<code>osm</code>) was selected, though other services that require registration or login might be more accurate. This process is time consuming and has been commented out. The address file has been cached.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co">#Because the processing time is quite lengthy, this has been commented out. When running custom data remove the comment.</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a></span>
+<span id="cb5-3"><a href="#cb5-3"></a><span class="co">#addresses_geocoded &lt;- geo(addresses$address, method = &#39;osm&#39;, full_results = FALSE)</span></span></code></pre></div>
+<div id="skip-geocoding-and-read-in-the-geocoded-addresses" class="section level5">
+<h5>Skip geocoding and read in the geocoded addresses</h5>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>addresses_gecoded &lt;-<span class="st"> </span><span class="kw">read_csv</span>(<span class="st">&quot;data/addresses_geocoded.csv&quot;</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="join-coordinates-to-distinct_partition_locations" class="section level4">
+<h4>Join coordinates to <code>distinct_partition_locations</code></h4>
+<p>The coordinates are joined to the existing dataframe <code>distinct_partition_locations</code>.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>partition_geolocations &lt;-<span class="st"> </span>partition_distinct_locations <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="st">                          </span><span class="kw">left_join</span>(addresses_gecoded)</span></code></pre></div>
+</div>
+<div id="clean-final-table" class="section level4">
+<h4>Clean final table</h4>
+<p>The geocoder will not necessarily catch all locations. Some of the locations have to be geocoded and corrected manually. This process is involved and has to be done through QGIS. Several additional fields were created to keep track of the changes:</p>
+<ul>
+<li><p>*_known* - Whether the location was ultimately found. FALSE indication that the location is a best guess</p></li>
+<li><p>*_camp* - Indicates that this was a refugee camp. This data was not used</p></li>
+<li><p><em>resolved_location</em> - The final location name for the coordinate. There may be a discrepancy between this and the initial address</p></li>
+<li><p><em>admin</em> - Indicates whether this a larger administrative area within which other locations fall. It also includes rivers. Admin areas are dropped from analysis because they are redundant. Likewise, as the position of the river is often unknowable, this too was dropped.</p></li>
+</ul>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="kw">write_csv</span>(partition_geolocations, <span class="st">&quot;data/partition_geolocations_raw.csv&quot;</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="part-3-statistical-overview" class="section level2">
+<h2>Part 3: Statistical Overview</h2>
+<div id="import-clean-data" class="section level4">
+<h4>Import clean data</h4>
+<p>Read in the data file <code>partition_geolocations_clean</code>. This file is <em>read-only</em> to prevent accidental file corruption.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>partition_clean &lt;-<span class="st"> </span><span class="kw">read_csv</span>(<span class="st">&quot;data/partition_geolocations_clean.csv&quot;</span>, <span class="dt">na=</span><span class="st">&quot;NA&quot;</span>)</span></code></pre></div>
+</div>
+<div id="aggregate-location-totals" class="section level4">
+<h4>Aggregate location totals</h4>
 </div>
 </div>
 

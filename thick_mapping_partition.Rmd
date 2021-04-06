@@ -12,11 +12,11 @@ output:
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE, error=FALSE)
 ```
 
-### Introduction
+## Introduction
 
 The documentation below is the white paper for the essay: "Partitioned Narratives: Thick Mapping the *1947 Partition Archive*." It includes the R code and csv files necessary to reproduce the calculations. Some of the spatial manipulations were performed in QGIS 3.16 (Hanover). When possible, images and Python code chunks have provided for reproduceability. Some steps involved converting CSV files to Geopackage files, as this is a common GIS workflow it has been skipped.
 
-### Part 1: Priming the NER Extracted Data
+## Part 1: Priming the NER Extracted Data
 
 #### Load packages 
 
@@ -43,10 +43,11 @@ partition_df <- read_csv("data/post_clean_locations.csv", na = c("", "NA"))
 #### Reformat `partition_df`
 
 The following procedure primes the data for analysis:
-- An address field is created by uniting the location, city, and country field
-- Remove unnecessary strings from data fields
-- Drop unnecessary columns
-- Keep all distinct addresses by person name. This prevents double counting locations in a person's account.
+
+* An address field is created by uniting the location, city, and country field
+* Remove unnecessary strings from data fields
+* Drop unnecessary columns
+* Keep all distinct addresses by person name. This prevents double counting locations in a person's account
 
 
 ```{r reformat_partition_df}
@@ -64,13 +65,13 @@ partition_distinct_locations <-  partition_df %>%
     migrated_to = str_remove(migrated_to, "Migrated to: "),
   ) %>%
   #drop unnecessary columns
-  select(name:migrated_to, summary:address) %>%
+  select(name:migrated_to, gender:address) %>%
   #keep all distinct addresses. This helps reduce the query time for the geocoder.
   distinct(address, .keep_all = TRUE) %>%
   ungroup()
 ```
 
-### Part 2: Geocoding
+## Part 2: Geocoding
 
 #### Find distinct addresses
 
@@ -84,9 +85,58 @@ addresses <- partition_distinct_locations %>%
 
 #### Run geocoder
 
-The script relies on the `tidygeocoder` package developed by Jesse Cambon, Diego Hernangómez, Christopher Belanger, Daniel Possenriede: (https://jessecambon.github.io/tidygeocoder/index.html) The package allows users to select the geocoder of their choice. For the purposes of easy reproduceability OpenStreetMap (`osm`) was selected, though other services that require usernames might be more accurate.
+The script relies on the `tidygeocoder` package developed by Jesse Cambon, Diego Hernangómez, Christopher Belanger, Daniel Possenriede: (https://jessecambon.github.io/tidygeocoder/index.html) The package allows users to select the geocoder of their choice. For the purposes of easy reproduceability OpenStreetMap (`osm`) was selected, though other services that require registration or login might be more accurate. This process is time consuming and has been commented out. The address file has been cached.
 
-```{r run_geocoder}
-#geo_partition <- geo(addresses$address, method = 'osm', full_results = FALSE)
+```{r run_geocoder, cache=TRUE, eval=FALSE}
+#Because the processing time is quite lengthy, this has been commented out. When running custom data remove the comment.
+
+#addresses_geocoded <- geo(addresses$address, method = 'osm', full_results = FALSE)
 ```
+
+##### Skip geocoding and read in the geocoded addresses
+
+```{r}
+addresses_gecoded <- read_csv("data/addresses_geocoded.csv")
+```
+
+
+#### Join coordinates to `distinct_partition_locations` 
+
+The coordinates are joined to the existing dataframe `distinct_partition_locations`.
+
+```{r join_coordinates}
+partition_geolocations <- partition_distinct_locations %>% 
+                          left_join(addresses_gecoded)
+```
+
+#### Clean final table
+
+The geocoder will not necessarily catch all locations. Some of the locations have to be geocoded and corrected manually. This process is involved and has to be done through QGIS. Several additional fields were created to keep track of the changes: 
+
+* *_known* - Whether the location was ultimately found. FALSE indication that the location is a best guess
+
+* *_camp* - Indicates that this was a refugee camp. This data was not used
+
+* *resolved_location* - The final location name for the coordinate. There may be a discrepancy between this and the initial address
+
+* *admin* - Indicates whether this a larger administrative area within which other locations fall. It also includes rivers. Admin areas are dropped from analysis because they are redundant. Likewise, as the position of the river is often unknowable, this too was dropped.
+
+```{r create_raw_locations}
+write_csv(partition_geolocations, "data/partition_geolocations_raw.csv")
+```
+
+
+## Part 3: Statistical Overview
+
+#### Import clean data
+
+Read in the data file `partition_geolocations_clean`. This file is *read-only* to prevent accidental file corruption.
+
+```{r read_clean_locations, results='hide'}
+partition_clean <- read_csv("data/partition_geolocations_clean.csv", na="NA")
+```
+
+
+#### Aggregate location totals
+
 
