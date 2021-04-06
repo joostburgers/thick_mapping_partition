@@ -1,9 +1,92 @@
 ---
 author: "Johannes Burgers and Saanchi Ahuja"
-title: "Gendered Spaces, Partitioned Memories"
-output: html_notebook
+title: "Partitioned Narratives: Thick Mapping the *1947 Partition Archive*"
+date: "Last update: `r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  rmdformats::robobook:
+    code_folding: "hide"
 ---
+
+
+```{r setup, include=FALSE, messages = FALSE, warning=FALSE, error=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE, error=FALSE)
+```
 
 ### Introduction
 
-This is a stublet for the notebook
+The documentation below is the white paper for the essay: "Partitioned Narratives: Thick Mapping the *1947 Partition Archive*." It includes the R code and csv files necessary to reproduce the calculations. Some of the spatial manipulations were performed in QGIS 3.16 (Hanover). When possible, images and Python code chunks have provided for reproduceability. Some steps involved converting CSV files to Geopackage files, as this is a common GIS workflow it has been skipped.
+
+### Part 1: Priming the NER Extracted Data
+
+#### Load packages 
+
+The following packages: `tidyverse`, `tidygeocoder`,`tidytext`,`stringi`,`htmlTable`, are necessary to run this script.
+
+```{r load_packages}
+library(tidyverse)
+library(tidygeocoder)
+library(tidytext)
+library(stringi)
+library(htmlTable)
+```
+
+
+#### Load location data
+
+The loaded csv file is a cleaned up version of the one that results from scraping and running the data through NER. The cleaning process mostly involves removing false positives, consolidating similar locations (i.e. Bombay and Mumbai), and removing any corrupt data. This process also included coding the gender of the narrative and whether a person mentioned their occupation. Finally, for less known or ambigious locations we added the city and district to aid the geotagger. 
+
+```{r load_partition_locations}
+partition_df <- read_csv("data/post_clean_locations.csv", na = c("", "NA"))
+```
+
+
+#### Reformat `partition_df`
+
+The following procedure primes the data for analysis:
+- An address field is created by uniting the location, city, and country field
+- Remove unnecessary strings from data fields
+- Drop unnecessary columns
+- Keep all distinct addresses by person name. This prevents double counting locations in a person's account.
+
+
+```{r reformat_partition_df}
+partition_distinct_locations <-  partition_df %>%
+  group_by(name) %>%
+  #create address field from locations, city, and country columns
+  unite("address",
+        locations:country,
+        sep = ", ",
+        na.rm = TRUE) %>%
+  #remove unnecessary text and add total locations column
+  mutate(
+    age = str_remove(age, "Age in 1947: "),
+    migrated_from = str_remove(migrated_from, "Migrated from: "),
+    migrated_to = str_remove(migrated_to, "Migrated to: "),
+  ) %>%
+  #drop unnecessary columns
+  select(name:migrated_to, summary:address) %>%
+  #keep all distinct addresses. This helps reduce the query time for the geocoder.
+  distinct(address, .keep_all = TRUE) %>%
+  ungroup()
+```
+
+### Part 2: Geocoding
+
+#### Find distinct addresses
+
+The geocoding the addresses can be quite time consuming. To save time, we can run only the distinct addresses and then join these back to `partition_distinct_locations` afterwards.
+
+```{r distinct_addresses}
+#create a vector of distinct addresses
+addresses <- partition_distinct_locations %>% 
+                distinct(address)
+```
+
+#### Run geocoder
+
+The script relies on the `tidygeocoder` package developed by Jesse Cambon, Diego Hernangómez, Christopher Belanger, Daniel Possenriede: (https://jessecambon.github.io/tidygeocoder/index.html) The package allows users to select the geocoder of their choice. For the purposes of easy reproduceability OpenStreetMap (`osm`) was selected, though other services that require usernames might be more accurate.
+
+```{r run_geocoder}
+#geo_partition <- geo(addresses$address, method = 'osm', full_results = FALSE)
+```
+
