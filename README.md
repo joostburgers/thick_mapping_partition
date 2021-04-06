@@ -1,4 +1,4 @@
-#Thick Mapping Partition
+# Thick Mapping Partition
 ## Johannes Burgers and Saanchi Ahuja
 
 ### Introduction
