@@ -1891,7 +1891,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <ul class="authors">
           <li class="divider"></li>
                                 <li><span><i class="glyphicon glyphicon-user"></i> Johannes Burgers and Saanchi Ahuja</span></li>
-                                         <li><span><i class="glyphicon glyphicon-calendar"></i> Last update: 06 April, 2021</span></li>
+                                         <li><span><i class="glyphicon glyphicon-calendar"></i> Last update: 11 April, 2021</span></li>
                   </ul>     
       </div>
       <div class="book-body fixed">
@@ -1973,8 +1973,8 @@ document.addEventListener('DOMContentLoaded', function() {
 <h4>Find distinct addresses</h4>
 <p>The geocoding the addresses can be quite time consuming. To save time, we can run only the distinct addresses and then join these back to <code>partition_distinct_locations</code> afterwards.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co">#create a vector of distinct addresses</span></span>
-<span id="cb4-2"><a href="#cb4-2"></a>addresses &lt;-<span class="st"> </span>partition_distinct_locations <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb4-3"><a href="#cb4-3"></a><span class="st">                </span><span class="kw">distinct</span>(address)</span></code></pre></div>
+<span id="cb4-2"><a href="#cb4-2"></a>addresses &lt;-<span class="st"> </span>partition_distinct_locations <span class="op">%&gt;%</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a><span class="st">  </span><span class="kw">distinct</span>(address)</span></code></pre></div>
 </div>
 <div id="run-geocoder" class="section level4">
 <h4>Run geocoder</h4>
@@ -1990,19 +1990,20 @@ document.addEventListener('DOMContentLoaded', function() {
 <div id="join-coordinates-to-distinct_partition_locations" class="section level4">
 <h4>Join coordinates to <code>distinct_partition_locations</code></h4>
 <p>The coordinates are joined to the existing dataframe <code>distinct_partition_locations</code>.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>partition_geolocations &lt;-<span class="st"> </span>partition_distinct_locations <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb7-2"><a href="#cb7-2"></a><span class="st">                          </span><span class="kw">left_join</span>(addresses_gecoded)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>partition_geolocations &lt;-<span class="st"> </span>partition_distinct_locations <span class="op">%&gt;%</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="st">  </span><span class="kw">left_join</span>(addresses_gecoded)</span></code></pre></div>
 </div>
 <div id="clean-final-table" class="section level4">
 <h4>Clean final table</h4>
 <p>The geocoder will not necessarily catch all locations. Some of the locations have to be geocoded and corrected manually. This process is involved and has to be done through QGIS. Several additional fields were created to keep track of the changes:</p>
 <ul>
-<li><p>*_known* - Whether the location was ultimately found. FALSE indication that the location is a best guess</p></li>
-<li><p>*_camp* - Indicates that this was a refugee camp. This data was not used</p></li>
+<li><p><em>known</em> - Whether the location was ultimately found. FALSE indication that the location is a best guess</p></li>
+<li><p><em>camp</em> - Indicates that this was a refugee camp. This data was not used</p></li>
 <li><p><em>resolved_location</em> - The final location name for the coordinate. There may be a discrepancy between this and the initial address</p></li>
 <li><p><em>admin</em> - Indicates whether this a larger administrative area within which other locations fall. It also includes rivers. Admin areas are dropped from analysis because they are redundant. Likewise, as the position of the river is often unknowable, this too was dropped.</p></li>
 </ul>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="kw">write_csv</span>(partition_geolocations, <span class="st">&quot;data/partition_geolocations_raw.csv&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="kw">write_csv</span>(partition_geolocations,</span>
+<span id="cb8-2"><a href="#cb8-2"></a>          <span class="st">&quot;data/partition_geolocations_raw.csv&quot;</span>)</span></code></pre></div>
 </div>
 </div>
 <div id="part-3-statistical-overview" class="section level2">
@@ -2010,10 +2011,20 @@ document.addEventListener('DOMContentLoaded', function() {
 <div id="import-clean-data" class="section level4">
 <h4>Import clean data</h4>
 <p>Read in the data file <code>partition_geolocations_clean</code>. This file is <em>read-only</em> to prevent accidental file corruption.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>partition_clean &lt;-<span class="st"> </span><span class="kw">read_csv</span>(<span class="st">&quot;data/partition_geolocations_clean.csv&quot;</span>, <span class="dt">na=</span><span class="st">&quot;NA&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>partition_clean &lt;-</span>
+<span id="cb9-2"><a href="#cb9-2"></a><span class="st">  </span><span class="kw">read_csv</span>(<span class="st">&quot;data/partition_geolocations_clean.csv&quot;</span>, <span class="dt">na =</span> <span class="st">&quot;NA&quot;</span>)</span></code></pre></div>
 </div>
 <div id="aggregate-location-totals" class="section level4">
 <h4>Aggregate location totals</h4>
+<p>Generate a table for all analysis: only include non-administrative areas, unique locations, and count by name.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>partition_statistics &lt;-<span class="st"> </span>partition_clean <span class="op">%&gt;%</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a><span class="st">  </span><span class="kw">filter</span>(admin <span class="op">==</span><span class="st"> </span><span class="ot">FALSE</span>) <span class="op">%&gt;%</span></span>
+<span id="cb10-3"><a href="#cb10-3"></a><span class="st">  </span><span class="kw">filter</span>(occupation <span class="op">!=</span><span class="st"> &quot;N&quot;</span>) <span class="op">%&gt;%</span></span>
+<span id="cb10-4"><a href="#cb10-4"></a><span class="st">  </span><span class="kw">group_by</span>(name) <span class="op">%&gt;%</span></span>
+<span id="cb10-5"><a href="#cb10-5"></a><span class="st">  </span><span class="kw">distinct</span>() <span class="op">%&gt;%</span></span>
+<span id="cb10-6"><a href="#cb10-6"></a><span class="st">  </span><span class="kw">add_count</span>(name, <span class="dt">name =</span> <span class="st">&quot;loc_by_name&quot;</span>) <span class="op">%&gt;%</span></span>
+<span id="cb10-7"><a href="#cb10-7"></a><span class="st">  </span><span class="kw">ungroup</span>() <span class="op">%&gt;%</span></span>
+<span id="cb10-8"><a href="#cb10-8"></a><span class="st">  </span><span class="kw">add_count</span>(resolved_location, <span class="dt">name =</span> <span class="st">&quot;loc_total&quot;</span>)</span></code></pre></div>
 </div>
 </div>
 

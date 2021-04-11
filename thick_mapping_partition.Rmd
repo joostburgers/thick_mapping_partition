@@ -79,8 +79,8 @@ The geocoding the addresses can be quite time consuming. To save time, we can ru
 
 ```{r distinct_addresses}
 #create a vector of distinct addresses
-addresses <- partition_distinct_locations %>% 
-                distinct(address)
+addresses <- partition_distinct_locations %>%
+  distinct(address)
 ```
 
 #### Run geocoder
@@ -105,24 +105,25 @@ addresses_gecoded <- read_csv("data/addresses_geocoded.csv")
 The coordinates are joined to the existing dataframe `distinct_partition_locations`.
 
 ```{r join_coordinates}
-partition_geolocations <- partition_distinct_locations %>% 
-                          left_join(addresses_gecoded)
+partition_geolocations <- partition_distinct_locations %>%
+  left_join(addresses_gecoded)
 ```
 
 #### Clean final table
 
 The geocoder will not necessarily catch all locations. Some of the locations have to be geocoded and corrected manually. This process is involved and has to be done through QGIS. Several additional fields were created to keep track of the changes: 
 
-* *_known* - Whether the location was ultimately found. FALSE indication that the location is a best guess
+* *known* - Whether the location was ultimately found. FALSE indication that the location is a best guess
 
-* *_camp* - Indicates that this was a refugee camp. This data was not used
+* *camp* - Indicates that this was a refugee camp. This data was not used
 
 * *resolved_location* - The final location name for the coordinate. There may be a discrepancy between this and the initial address
 
 * *admin* - Indicates whether this a larger administrative area within which other locations fall. It also includes rivers. Admin areas are dropped from analysis because they are redundant. Likewise, as the position of the river is often unknowable, this too was dropped.
 
 ```{r create_raw_locations}
-write_csv(partition_geolocations, "data/partition_geolocations_raw.csv")
+write_csv(partition_geolocations,
+          "data/partition_geolocations_raw.csv")
 ```
 
 
@@ -133,10 +134,31 @@ write_csv(partition_geolocations, "data/partition_geolocations_raw.csv")
 Read in the data file `partition_geolocations_clean`. This file is *read-only* to prevent accidental file corruption.
 
 ```{r read_clean_locations, results='hide'}
-partition_clean <- read_csv("data/partition_geolocations_clean.csv", na="NA")
+partition_clean <-
+  read_csv("data/partition_geolocations_clean.csv", na = "NA")
 ```
 
 
 #### Aggregate location totals
+
+Generate a table for all analysis: only include non-administrative areas, unique locations, and count by name. 
+
+```{r add_location_totals}
+
+
+partition_statistics <- partition_clean %>%
+  filter(admin == FALSE) %>%
+  filter(occupation != "N") %>%
+  group_by(name) %>%
+  distinct() %>%
+  add_count(name, name = "loc_by_name") %>%
+  ungroup() %>%
+  add_count(resolved_location, name = "loc_total")
+
+
+
+```
+
+
 
 
