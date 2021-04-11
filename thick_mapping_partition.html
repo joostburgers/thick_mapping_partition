@@ -2151,10 +2151,9 @@ Yes
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>mean_locations_occ_gen &lt;-<span class="st"> </span>partition_statistics <span class="op">%&gt;%</span><span class="st"> </span></span>
 <span id="cb14-2"><a href="#cb14-2"></a><span class="st">              </span><span class="kw">group_by</span>(gender, occupation) <span class="op">%&gt;%</span><span class="st"> </span></span>
 <span id="cb14-3"><a href="#cb14-3"></a><span class="st">              </span><span class="kw">summarize</span>(<span class="dt">mean_location =</span> <span class="kw">round</span>(<span class="kw">mean</span>(loc_by_name),<span class="dv">2</span>))</span></code></pre></div>
-<pre><code>## `summarise()` has grouped output by &#39;gender&#39;. You can override using the `.groups` argument.</code></pre>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a>mean_locations_occ_gen <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb16-2"><a href="#cb16-2"></a><span class="st">   </span><span class="kw">addHtmlTableStyle</span>(<span class="dt">col.rgroup =</span> <span class="kw">c</span>(<span class="st">&quot;none&quot;</span>, <span class="st">&quot;#F7F7F7&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb16-3"><a href="#cb16-3"></a><span class="st">          </span><span class="kw">htmlTable</span>(<span class="dt">header =</span> <span class="kw">c</span>(<span class="st">&quot;Gender&quot;</span>, <span class="st">&quot;Occupation&quot;</span>, <span class="st">&quot;Mean Locations Mentioned&quot;</span> ))</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a>mean_locations_occ_gen <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb15-2"><a href="#cb15-2"></a><span class="st">   </span><span class="kw">addHtmlTableStyle</span>(<span class="dt">col.rgroup =</span> <span class="kw">c</span>(<span class="st">&quot;none&quot;</span>, <span class="st">&quot;#F5FBFF&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb15-3"><a href="#cb15-3"></a><span class="st">          </span><span class="kw">htmlTable</span>(<span class="dt">header =</span> <span class="kw">c</span>(<span class="st">&quot;Gender&quot;</span>, <span class="st">&quot;Occupation&quot;</span>, <span class="st">&quot;Mean Locations Mentioned&quot;</span> ))</span></code></pre></div>
 <table class="gmisc_table" style="border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;">
 <thead>
 <tr>
@@ -2186,17 +2185,17 @@ Not Mentioned
 8.41
 </td>
 </tr>
-<tr style="background-color: #f7f7f7;">
-<td style="background-color: #f7f7f7; text-align: left;">
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
 2
 </td>
-<td style="background-color: #f7f7f7; text-align: center;">
+<td style="background-color: #f5fbff; text-align: center;">
 Female
 </td>
-<td style="background-color: #f7f7f7; text-align: center;">
+<td style="background-color: #f5fbff; text-align: center;">
 Yes
 </td>
-<td style="background-color: #f7f7f7; text-align: center;">
+<td style="background-color: #f5fbff; text-align: center;">
 9.56
 </td>
 </tr>
@@ -2214,18 +2213,120 @@ Not Mentioned
 7.19
 </td>
 </tr>
-<tr style="background-color: #f7f7f7;">
-<td style="background-color: #f7f7f7; border-bottom: 2px solid grey; text-align: left;">
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; border-bottom: 2px solid grey; text-align: left;">
 4
 </td>
-<td style="background-color: #f7f7f7; border-bottom: 2px solid grey; text-align: center;">
+<td style="background-color: #f5fbff; border-bottom: 2px solid grey; text-align: center;">
 Male
 </td>
-<td style="background-color: #f7f7f7; border-bottom: 2px solid grey; text-align: center;">
+<td style="background-color: #f5fbff; border-bottom: 2px solid grey; text-align: center;">
 Yes
 </td>
-<td style="background-color: #f7f7f7; border-bottom: 2px solid grey; text-align: center;">
+<td style="background-color: #f5fbff; border-bottom: 2px solid grey; text-align: center;">
 10.33
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="percent-mention-of-occupation-by-gender" class="section level4">
+<h4>Percent mention of occupation by gender</h4>
+<p>Generally, men mentioned their occupations significantly more than women.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a>partition_statistics <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb16-2"><a href="#cb16-2"></a><span class="st">  </span><span class="kw">group_by</span>(gender) <span class="op">%&gt;%</span></span>
+<span id="cb16-3"><a href="#cb16-3"></a><span class="st">  </span><span class="kw">select</span>(name, gender, occupation) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb16-4"><a href="#cb16-4"></a><span class="st">  </span><span class="kw">distinct</span>() <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb16-5"><a href="#cb16-5"></a><span class="st">  </span><span class="kw">count</span>(occupation) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb16-6"><a href="#cb16-6"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">percent =</span> <span class="kw">paste</span>(<span class="kw">round</span>(n<span class="op">/</span><span class="kw">sum</span>(n),<span class="dv">2</span>)<span class="op">*</span><span class="dv">100</span>,<span class="st">&quot;%&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb16-7"><a href="#cb16-7"></a><span class="st">  </span><span class="kw">addHtmlTableStyle</span>(<span class="dt">col.rgroup =</span> <span class="kw">c</span>(<span class="st">&quot;none&quot;</span>, <span class="st">&quot;#F5FBFF&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb16-8"><a href="#cb16-8"></a><span class="st">  </span><span class="kw">htmlTable</span>(<span class="dt">header =</span> <span class="kw">c</span>(<span class="st">&quot;Gender&quot;</span>, <span class="st">&quot;Occupation&quot;</span>, <span class="st">&quot;Number of People&quot;</span>, <span class="st">&quot;Percent&quot;</span> ))</span></code></pre></div>
+<table class="gmisc_table" style="border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;">
+<thead>
+<tr>
+<th style="border-bottom: 1px solid grey; border-top: 2px solid grey;">
+</th>
+<th style="font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;">
+Gender
+</th>
+<th style="font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;">
+Occupation
+</th>
+<th style="font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;">
+Number of People
+</th>
+<th style="font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;">
+Percent
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">
+1
+</td>
+<td style="text-align: center;">
+Female
+</td>
+<td style="text-align: center;">
+Not Mentioned
+</td>
+<td style="text-align: center;">
+70
+</td>
+<td style="text-align: center;">
+62 %
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
+2
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+Female
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+Yes
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+43
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+38 %
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+3
+</td>
+<td style="text-align: center;">
+Male
+</td>
+<td style="text-align: center;">
+Not Mentioned
+</td>
+<td style="text-align: center;">
+17
+</td>
+<td style="text-align: center;">
+8 %
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; border-bottom: 2px solid grey; text-align: left;">
+4
+</td>
+<td style="background-color: #f5fbff; border-bottom: 2px solid grey; text-align: center;">
+Male
+</td>
+<td style="background-color: #f5fbff; border-bottom: 2px solid grey; text-align: center;">
+Yes
+</td>
+<td style="background-color: #f5fbff; border-bottom: 2px solid grey; text-align: center;">
+188
+</td>
+<td style="background-color: #f5fbff; border-bottom: 2px solid grey; text-align: center;">
+92 %
 </td>
 </tr>
 </tbody>
