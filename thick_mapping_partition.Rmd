@@ -139,22 +139,119 @@ partition_clean <-
 ```
 
 
+```{r create_data_labels, echo=FALSE}
+#This is not a necessary step, but it helps make for cleaner charts.
+
+ 
+partition_clean$occupation <- factor(partition_clean$occupation,
+labels = c("No", "Not Mentioned", "Yes"))
+
+partition_clean$gender <- factor(partition_clean$gender,
+labels = c("Female", "Male"))
+
+```
+
+
+
 #### Aggregate location totals
 
-Generate a table for all analysis: only include non-administrative areas, unique locations, and count by name. 
+Generate a table for all analysis: only include non-administrative areas, unique locations for each person, counts per person, and total counts per location. 
 
 ```{r add_location_totals}
-
-
 partition_statistics <- partition_clean %>%
   filter(admin == FALSE) %>%
-  filter(occupation != "N") %>%
+   filter(occupation!="No") %>% 
   group_by(name) %>%
   distinct() %>%
   add_count(name, name = "loc_by_name") %>%
   ungroup() %>%
   add_count(resolved_location, name = "loc_total")
+```
 
+#### General Overview
+
+```{r general_overview, ECHO= FALSE}
+#Get number of unique locations
+
+unique_locations <- partition_statistics %>% 
+  ungroup() %>% 
+  select(resolved_location) %>% 
+  distinct() %>% 
+  nrow()
+
+#Get number of unique people
+unique_people <- partition_statistics %>% 
+  ungroup() %>% 
+  select(name, gender) %>% 
+  distinct() %>% 
+  nrow()
+
+#Calculate mean locations mentioned
+mean_locations <- partition_statistics %>% 
+            ungroup() %>%  
+            summarize(mean_locations = mean(loc_by_name))
+
+```
+
+There are `r unique_locations` unique locations in the data set. These are distributed across `r unique_people` people. On average, each person mentions `r round(mean_locations,2)` locations. 
+
+#### Locations by gender
+
+Broken down by gender, it is clear that the mean number of locations by men is higher than that of women.
+
+
+```{r locations_by_gender, message=TRUE}
+mean_locations_gender <- partition_statistics %>% 
+              group_by(gender) %>% 
+              summarize(mean_gender = round(mean(loc_by_name),2))
+
+mean_locations_gender %>% 
+              htmlTable(header= c("Gender", "Mean Locations Mentioned"))
+```
+
+#### Locations by occupation
+
+A similar trend emerges when accounting for occupation. Here, people who mention their occupation mention more locations.
+
+```{r locations_by_occupation, message=TRUE}
+mean_locations_occupation <- partition_statistics %>% 
+              group_by(occupation) %>% 
+              summarize(mean_occupation = round(mean(loc_by_name),2))
+
+mean_locations_occupation %>% 
+  htmlTable(header= c("Occupation", "Mean Locations Mentioned"))
+```
+
+
+#### Locations by occupation and gender
+
+The contrast between locations mentioned and the gender and whether occupation is mentioned becomes even starker when the values are disaggregated.
+
+```{r locations_occupation_gender}
+mean_locations_occ_gen <- partition_statistics %>% 
+              group_by(gender, occupation) %>% 
+              summarize(mean_location = round(mean(loc_by_name),2))
+```
+
+```{r locations_occupation_gender_table, message = TRUE}
+mean_locations_occ_gen %>% 
+   addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF")) %>% 
+          htmlTable(header = c("Gender", "Occupation", "Mean Locations Mentioned" ))
+```
+
+#### Percent mention of occupation by gender
+
+Generally, men mentioned their occupations significantly more than women.
+
+```{r}
+partition_statistics %>% 
+  group_by(gender) %>%
+  select(name, gender, occupation) %>% 
+  distinct() %>% 
+  count(occupation) %>% 
+  mutate(percent = paste(round(n/sum(n),2)*100,"%")) %>% 
+  addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF")) %>% 
+  htmlTable(header = c("Gender", "Occupation", "Number of People", "Percent" ))
 
 
 ```
