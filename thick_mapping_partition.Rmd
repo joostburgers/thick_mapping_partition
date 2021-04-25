@@ -28,6 +28,7 @@ library(tidygeocoder)
 library(tidytext)
 library(stringi)
 library(htmlTable)
+library(ggplot2)
 ```
 
 
@@ -85,7 +86,7 @@ addresses <- partition_distinct_locations %>%
 
 #### Run geocoder
 
-The script relies on the `tidygeocoder` package developed by Jesse Cambon, Diego Hernangómez, Christopher Belanger, Daniel Possenriede: (https://jessecambon.github.io/tidygeocoder/index.html) The package allows users to select the geocoder of their choice. For the purposes of easy reproduceability OpenStreetMap (`osm`) was selected, though other services that require registration or login might be more accurate. This process is time consuming and has been commented out. The address file has been cached.
+The script relies on the `tidygeocoder` package developed by Jesse Cambon, Diego Hernangómez, Christopher Belanger, Daniel Possenriede: [tidygeocoder](https://jessecambon.github.io/tidygeocoder/index.html). The package allows users to select the geocoder of their choice. For the purposes of easy reproduceability OpenStreetMap (`osm`) was selected, though other services that require registration or login might be more accurate. This process is time consuming and has been commented out. The address file has been cached.
 
 ```{r run_geocoder, cache=TRUE, eval=FALSE}
 #Because the processing time is quite lengthy, this has been commented out. When running custom data remove the comment.
@@ -111,7 +112,7 @@ partition_geolocations <- partition_distinct_locations %>%
 
 #### Clean final table
 
-The geocoder will not necessarily catch all locations. Some of the locations have to be geocoded and corrected manually. This process is involved and has to be done through QGIS. Several additional fields were created to keep track of the changes: 
+The geocoder will not necessarily catch all locations. Some of the locations have to be geocoded and corrected manually. This process is involved, and has to be done through QGIS. Several additional fields were created to keep track of the changes: 
 
 * *known* - Whether the location was ultimately found. FALSE indication that the location is a best guess
 
@@ -173,24 +174,23 @@ partition_statistics <- partition_clean %>%
 ```{r general_overview, ECHO= FALSE}
 #Get number of unique locations
 
-unique_locations <- partition_statistics %>% 
-  ungroup() %>% 
-  select(resolved_location) %>% 
-  distinct() %>% 
+unique_locations <- partition_statistics %>%
+  ungroup() %>%
+  select(resolved_location) %>%
+  distinct() %>%
   nrow()
 
 #Get number of unique people
-unique_people <- partition_statistics %>% 
-  ungroup() %>% 
-  select(name, gender) %>% 
-  distinct() %>% 
+unique_people <- partition_statistics %>%
+  ungroup() %>%
+  select(name, gender) %>%
+  distinct() %>%
   nrow()
 
 #Calculate mean locations mentioned
-mean_locations <- partition_statistics %>% 
-            ungroup() %>%  
-            summarize(mean_locations = mean(loc_by_name))
-
+mean_locations <- partition_statistics %>%
+  ungroup() %>%
+  summarize(mean_locations = mean(loc_by_name))
 ```
 
 There are `r unique_locations` unique locations in the data set. These are distributed across `r unique_people` people. On average, each person mentions `r round(mean_locations,2)` locations. 
@@ -201,12 +201,13 @@ Broken down by gender, it is clear that the mean number of locations by men is h
 
 
 ```{r locations_by_gender, message=TRUE}
-mean_locations_gender <- partition_statistics %>% 
-              group_by(gender) %>% 
-              summarize(mean_gender = round(mean(loc_by_name),2))
+mean_locations_gender <- partition_statistics %>%
+  group_by(gender) %>%
+  summarize(mean_gender = round(mean(loc_by_name), 2))
 
-mean_locations_gender %>% 
-              htmlTable(header= c("Gender", "Mean Locations Mentioned"))
+mean_locations_gender %>%
+  addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF")) %>% 
+  htmlTable(header = c("Gender", "Mean Locations Mentioned"))
 ```
 
 #### Locations by occupation
@@ -214,12 +215,13 @@ mean_locations_gender %>%
 A similar trend emerges when accounting for occupation. Here, people who mention their occupation mention more locations.
 
 ```{r locations_by_occupation, message=TRUE}
-mean_locations_occupation <- partition_statistics %>% 
-              group_by(occupation) %>% 
-              summarize(mean_occupation = round(mean(loc_by_name),2))
+mean_locations_occupation <- partition_statistics %>%
+  group_by(occupation) %>%
+  summarize(mean_occupation = round(mean(loc_by_name), 2))
 
-mean_locations_occupation %>% 
-  htmlTable(header= c("Occupation", "Mean Locations Mentioned"))
+mean_locations_occupation %>%
+  addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF")) %>% 
+  htmlTable(header = c("Occupation", "Mean Locations Mentioned"))
 ```
 
 
@@ -228,9 +230,9 @@ mean_locations_occupation %>%
 The contrast between locations mentioned and the gender and whether occupation is mentioned becomes even starker when the values are disaggregated.
 
 ```{r locations_occupation_gender}
-mean_locations_occ_gen <- partition_statistics %>% 
-              group_by(gender, occupation) %>% 
-              summarize(mean_location = round(mean(loc_by_name),2))
+mean_locations_occ_gen <- partition_statistics %>%
+  group_by(gender, occupation) %>%
+  summarize(mean_location = round(mean(loc_by_name), 2))
 ```
 
 ```{r locations_occupation_gender_table, message = TRUE}
@@ -252,9 +254,30 @@ partition_statistics %>%
   mutate(percent = paste(round(n/sum(n),2)*100,"%")) %>% 
   addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF")) %>% 
   htmlTable(header = c("Gender", "Occupation", "Number of People", "Percent" ))
-
-
 ```
+
+
+#### Distribution of locations mentioned
+
+The distribution pattern of locations mentioned shows that men without occupations make a negligible impact on the mean number of locations mentioned. Meanwhile, this is what tends to skew the women downwards more. It is not as if men overwhelming mention more locations, but a few men mention quite a few more locations.
+
+```{r histogram_mean_locations}
+ p <- partition_statistics %>% 
+  distinct(name,gender, occupation, loc_by_name) %>% 
+  group_by(gender)
+  
+  
+  p %>% ggplot(aes(loc_by_name, fill = gender))+
+    geom_histogram(color="gray", opacity=.5,alpha=.4, position = "identity" )+
+  # geom_histogram(position="identity", alpha=0.5)+
+   
+  scale_fill_brewer(palette="Pastel2")+
+  labs(title="Histogram of Mentioned Locations by Occupation and Gender",x="Occupation", y = "Number of Locations Mentioned", fill= "Gender")+
+     facet_wrap(~occupation)+
+  theme_classic()
+  
+```
+
 
 
 

@@ -1891,7 +1891,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <ul class="authors">
           <li class="divider"></li>
                                 <li><span><i class="glyphicon glyphicon-user"></i> Johannes Burgers and Saanchi Ahuja</span></li>
-                                         <li><span><i class="glyphicon glyphicon-calendar"></i> Last update: 11 April, 2021</span></li>
+                                         <li><span><i class="glyphicon glyphicon-calendar"></i> Last update: 24 April, 2021</span></li>
                   </ul>     
       </div>
       <div class="book-body fixed">
@@ -1920,7 +1920,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- Don't indent these lines or it will mess pre blocks indentation --> 
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>The documentation below is the white paper for the essay: “Partitioned Narratives: Thick Mapping the <em>1947 Partition Archive</em>.” It includes the R code and csv files necessary to reproduce the calculations. Some of the spatial manipulations were performed in QGIS 3.16 (Hanover). When possible, images and Python code chunks have provided for reproduceability. Some steps involved converting CSV files to Geopackage files, as this is a common GIS workflow it has been skipped.</p>
+<p>The documentation below is the white paper for the essay: “Partitioned Narratives: Thick Mapping the <em>1947 Partition Archive</em>.” It includes the R code and csv files necessary to reproduce the calculations. Some of the spatial manipulations were performed in QGIS 3.16 (Hannover). When possible, images and Python code chunks have provided for reproduceability. Some steps involved converting CSV files to Geopackage files, as this is a common GIS workflow it has been skipped.</p>
 </div>
 <div id="part-1-priming-the-ner-extracted-data" class="section level2">
 <h2>Part 1: Priming the NER Extracted Data</h2>
@@ -1978,7 +1978,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <div id="run-geocoder" class="section level4">
 <h4>Run geocoder</h4>
-<p>The script relies on the <code>tidygeocoder</code> package developed by Jesse Cambon, Diego Hernangómez, Christopher Belanger, Daniel Possenriede: (<a href="https://jessecambon.github.io/tidygeocoder/index.html" class="uri">https://jessecambon.github.io/tidygeocoder/index.html</a>) The package allows users to select the geocoder of their choice. For the purposes of easy reproduceability OpenStreetMap (<code>osm</code>) was selected, though other services that require registration or login might be more accurate. This process is time consuming and has been commented out. The address file has been cached.</p>
+<p>The script relies on the <code>tidygeocoder</code> package developed by Jesse Cambon, Diego Hernangómez, Christopher Belanger, Daniel Possenriede: <a href="https://jessecambon.github.io/tidygeocoder/index.html">tidygeocoder</a> The package allows users to select the geocoder of their choice. For the purposes of easy reproduceability OpenStreetMap (<code>osm</code>) was selected, though other services that require registration or login might be more accurate. This process is time consuming and has been commented out. The address file has been cached.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co">#Because the processing time is quite lengthy, this has been commented out. When running custom data remove the comment.</span></span>
 <span id="cb5-2"><a href="#cb5-2"></a></span>
 <span id="cb5-3"><a href="#cb5-3"></a><span class="co">#addresses_geocoded &lt;- geo(addresses$address, method = &#39;osm&#39;, full_results = FALSE)</span></span></code></pre></div>
