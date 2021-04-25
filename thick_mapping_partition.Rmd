@@ -333,15 +333,15 @@ Geocode each from hub.
 Attach data back to from hubs.
 
 ```{r geocode_join}
-hub_from_join <- hub_from_geo %>% 
-                  rename(migrated_from = address)
-
-hub_from_join <- partition_statistics %>% 
-                 left_join(hub_from_join) 
-
-hub_from_join <- hub_from_join %>% 
-                select(name,age,migrated_from,gender,occupation,lat,long) %>% 
-                  distinct()
+# hub_from_join <- hub_from_geo %>% 
+#                   rename(migrated_from = address)
+# 
+# hub_from_join <- partition_statistics %>% 
+#                  left_join(hub_from_join) 
+# 
+# hub_from_join <- hub_from_join %>% 
+#                 select(name,age,migrated_from,gender,occupation,lat,long) %>% 
+#                   distinct()
 ```
 
 
