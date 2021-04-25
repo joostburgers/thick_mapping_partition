@@ -29,6 +29,7 @@ library(tidytext)
 library(stringi)
 library(htmlTable)
 library(ggplot2)
+library(scales)
 ```
 
 
@@ -262,19 +263,94 @@ partition_statistics %>%
 The distribution pattern of locations mentioned shows that men without occupations make a negligible impact on the mean number of locations mentioned. Meanwhile, the number of women without occupations is quite substantial and do tend to mention fewer locations. Even among those who mentione their occupation, the men's distribution has a longer tail.
 
 ```{r histogram_mean_locations, fig.cap="Figure 1: Locations Mentioned by Occupation and Gender"}
- p <- partition_statistics %>% 
-  distinct(name,gender, occupation, loc_by_name) %>% 
-  group_by(gender)
-  
-  
-  p %>% ggplot(aes(loc_by_name, fill = gender))+
-    geom_histogram(color="black", opacity=.8 ,alpha=.4, position = "identity" )+
-    scale_fill_brewer(palette="Pastel2")+
-  labs(title="Histogram of Mentioned Locations by Occupation and Gender",x="Occupation", y = "Number of Locations Mentioned", fill= "Gender")+
-     facet_wrap(~occupation)+
+partition_statistics %>%
+  distinct(name, gender, occupation, loc_by_name) %>%
+  ggplot(aes(loc_by_name, fill = gender)) +
+  geom_histogram(
+    color = "black",
+    opacity = .8 ,
+    alpha = .4,
+    position = "identity"
+  ) +
+  scale_fill_brewer(palette = "Pastel2") +
+  labs(title = "Histogram of Mentioned Locations by Occupation and Gender",
+       x = "Occupation",
+       y = "Number of Locations Mentioned",
+       fill = "Gender") +
+  facet_wrap(~ occupation) +
   theme_classic()
   
 ```
+
+### T-test and ANOVA score
+
+
+```{r ttest_ANOVA}
+#Generate t-scores
+
+gender_ttest <- t.test(loc_by_name ~ gender, partition_statistics)
+occupation_ttest <- t.test(loc_by_name ~ occupation, partition_statistics)
+
+#Create dataframes of tscores
+tscores <- map_df(list(gender_ttest, occupation_ttest), tidy)
+tscores <- tscores[c("p.value")]
+
+#Generate variables for ANOVA
+gender_occupation <- partition_statistics %>%
+  unite("gender_occupation", gender:occupation, remove = FALSE)
+anova_gender_occupation <-
+  aov(loc_by_name ~ gender_occupation, gender_occupation)
+
+#Create dataframe for ANOVA score
+anovascore <- map_df(list(anova_gender_occupation), tidy)
+anovascore <- anovascore[c("statistic", "p.value")]
+
+```
+
+T-tests of both gender and occupation individually affirms what visual inspection already suggests: that the mean distribution is not random.
+A Welch Two Sample t-test was done both on the difference in means of locations by gender (p = `r scientific(tscores[1,1],digits= 2)`) and the difference in means of locations by occupation (p = `r scientific(tscores[2,1],digits= 2)`)affirms what visual inspection already suggests: that the mean distribution is not random. At the same time, an analysis of variance (ANOVA) test reveals an F-score of `r round(anovascore[1,1],2)` and a p value of `r scientific(anovascore[1,2],digits= 2)`, indicating that the variance between means is greater than the variance within means and not random.
+
+## Part 4: Spatial Analysis
+
+The spatial analysis requires several manipulations of the data that were done in QGIS. What follows is a brief outline.
+
+### Create a hub and spokes model
+
+Subset the data into *from* hubs.
+```{r from_hub}
+hub_from <- partition_statistics %>% 
+            select(migrated_from) %>% 
+            distinct()
+```
+
+Geocode each from hub.
+*Note: the geocoding process is skipped for the purposes of this notebook*
+
+```{r geocode_from_hubs}
+#hub_from_geo <- geo(hub_from$migrated_from, method = 'osm', full_results = FALSE)
+```
+
+Attach data back to from hubs.
+
+```{r geocode_join}
+hub_from_join <- hub_from_geo %>% 
+                  rename(migrated_from = address)
+
+hub_from_join <- partition_statistics %>% 
+                 left_join(hub_from_join) 
+
+hub_from_join <- hub_from_join %>% 
+                select(name,age,migrated_from,gender,occupation,lat,long) %>% 
+                  distinct()
+```
+
+
+Write from_hub file for geoprocessing.
+```{r}
+#write_csv(hub_from_join,"from_hubs.csv")
+```
+
+TODO: Clean partition locations Chandni Chowk is off the entire process needs to be run again
 
 
 
