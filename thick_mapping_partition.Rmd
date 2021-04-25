@@ -259,7 +259,7 @@ partition_statistics %>%
 
 #### Distribution of locations mentioned
 
-The distribution pattern of locations mentioned shows that men without occupations make a negligible impact on the mean number of locations mentioned. Meanwhile, this is what tends to skew the women downwards more. It is not as if men overwhelming mention more locations, but a few men mention quite a few more locations.
+The distribution pattern of locations mentioned shows that men without occupations make a negligible impact on the mean number of locations mentioned. Meanwhile, the number of women without occupations is quite substantial and do tend to mention fewer locations. Even among those who mentione their occupation, the men's distribution has a longer tail.
 
 ```{r histogram_mean_locations}
  p <- partition_statistics %>% 
@@ -268,10 +268,8 @@ The distribution pattern of locations mentioned shows that men without occupatio
   
   
   p %>% ggplot(aes(loc_by_name, fill = gender))+
-    geom_histogram(color="gray", opacity=.5,alpha=.4, position = "identity" )+
-  # geom_histogram(position="identity", alpha=0.5)+
-   
-  scale_fill_brewer(palette="Pastel2")+
+    geom_histogram(color="black", opacity=.8 ,alpha=.4, position = "identity" )+
+    scale_fill_brewer(palette="Pastel2")+
   labs(title="Histogram of Mentioned Locations by Occupation and Gender",x="Occupation", y = "Number of Locations Mentioned", fill= "Gender")+
      facet_wrap(~occupation)+
   theme_classic()
