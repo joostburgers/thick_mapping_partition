@@ -245,7 +245,7 @@ mean_locations_occ_gen %>%
 
 Generally, men mentioned their occupations significantly more than women.
 
-```{r}
+```{r occupation_gender_table, fig.cap="Percentage breakdown of each group"}
 partition_statistics %>% 
   group_by(gender) %>%
   select(name, gender, occupation) %>% 
@@ -261,7 +261,7 @@ partition_statistics %>%
 
 The distribution pattern of locations mentioned shows that men without occupations make a negligible impact on the mean number of locations mentioned. Meanwhile, the number of women without occupations is quite substantial and do tend to mention fewer locations. Even among those who mentione their occupation, the men's distribution has a longer tail.
 
-```{r histogram_mean_locations}
+```{r histogram_mean_locations, fig.cap="Figure 1: Locations Mentioned by Occupation and Gender"}
  p <- partition_statistics %>% 
   distinct(name,gender, occupation, loc_by_name) %>% 
   group_by(gender)
