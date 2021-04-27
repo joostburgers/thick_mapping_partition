@@ -312,47 +312,226 @@ A Welch Two Sample t-test was done both on the difference in means of locations 
 
 ## Part 4: Spatial Analysis
 
+The spatial analysis of the data set was done with QGIS. As these manipulations are hard to document, only their result is shown. There were a number of cases where the `tidygeotagger` did not properly catch all of the locations. These had to be added manually. 
+
+### Location diversity
+
+#### Departure locations
+
+```{r departure_locations}
+#Departure locations
+part_from <- partition_statistics %>%
+  mutate(migrated_from = str_extract(migrated_from, "[^,]+")) %>%
+  drop_na(migrated_from) %>%
+  select(name, migrated_from, gender)  %>%
+  distinct(name, migrated_from, gender) %>%
+  add_count(migrated_from, name = "total_location") %>%
+  group_by(gender) %>%
+  add_count(migrated_from, name = "loc_gender") %>%
+  add_count(gender, name = "gender_tot") %>%
+  mutate(percent = loc_gender / gender_tot) %>%
+  select(-name,-loc_gender,-gender_tot) %>%
+  distinct() %>%
+  #ungroup() %>%
+  arrange(desc(total_location), gender) %>%
+  top_n(5, total_location) %>%
+  mutate(percent = percent(percent,2)) %>%
+  select(-total_location)
+
+#Number of departure locations by gender
+gender_migration <- partition_statistics %>%
+  drop_na(migrated_from) %>%
+  distinct(migrated_from, gender) %>%
+  group_by(gender) %>%
+  count(gender)
+```
+
+The first thing that is notable about the departure locations is their diversity. While a plurality of people departed from Lahore (`r part_from[1,3]`) and a second group from Rawalpindi (`r part_from[2,3]`), there were many who departed from quite different locations. In fact, women departed from `r gender_migration[1,2]`, while men departed from `r gender_migration[2,2]` different locations.
+
+We can observe this diversity of points of departure by looking at a spatial representation of the direct lines of travel to Delhi and noting the diversity of points of origin. 
+
+![Figure 2: Departure locations during Partition](images/poinst_of_departure.png)
+
+```{r departure_locations_table, echo=FALSE}
+part_from %>% 
+  addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF"),pos.caption = "bottom") %>%
+  htmlTable(header = c(
+    "Migrated From",
+    "Gender",
+    "Percent departure by Gender"
+    
+  ),caption="Table 3: Top 5 Departure locations by gender")
+
+```
+
+
+#### Transit Locations
+
+
+```{r transfer_locations}
+partition_transfer <- partition_statistics %>%
+  #Filter out Delhi as a final location
+  filter(resolved_location != "Delhi") %>%
+  
+  #Clean up the migrated from and migrated to data
+  mutate(migrated_from = str_extract(migrated_from, "[^,]+")) %>%
+  mutate(migrated_to = str_extract(migrated_to, "[^,]+")) %>%
+  
+  #Remove all cases where the migrated from location is the same as one of the transit locations
+  filter(migrated_from != resolved_location) %>%
+  
+  #Remobe all cases where the resolved location equals migrated to.
+  filter(migrated_to != resolved_location) %>%
+  
+  #Get the number of transfer locations based on where people migrated from and their gender
+  group_by(gender) %>%
+  mutate(total_gender = n_distinct(name)) %>%
+  group_by(migrated_from, gender) %>%
+  add_count(resolved_location, name = "migration_location", sort =
+              TRUE) %>%
+  #Calcuate the percentage as a share of all migration locations
+  mutate(percent_transit = migration_location / total_gender) %>%
+  
+  #Clean up table for presentation
+  select(migrated_from,
+         gender,
+         resolved_location,
+         migration_location,
+         percent_transit) %>%
+  distinct(migrated_from, resolved_location, percent_transit) %>%
+  arrange(desc(percent_transit), resolved_location) %>%
+  ungroup() %>%
+  top_n(10, percent_transit) %>%
+  mutate(percent_transit = percent(percent_transit, 2)) %>%
+  relocate(gender, .before = migrated_from)
+```
+
+Likewise the transit locations were also quite diverse. Amritsar occurs more frequently for both women (`r partition_transfer[1,4]`) and (`r partition_transfer[2,4]`), but does not stand out as the majority locations.
+
+```{r departure_table}
+#Generate table
+partition_transfer %>%
+  addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF")) %>%
+  htmlTable(header = c(
+    "Gender",
+    "Migrated From",
+    "Transfer",
+    "Percent of Respondents Transfered"
+  ))
+
+```
+
+
 The spatial analysis requires several manipulations of the data that were done in QGIS. What follows is a brief outline.
 
-### Create a hub and spokes model
+#### Create from Locations
+*Note: the geocoding process is skipped for the purposes of this notebook*
 
-Subset the data into *from* hubs.
+ - Subset the data into *from* hubs.
 ```{r from_hub}
 hub_from <- partition_statistics %>% 
             select(migrated_from) %>% 
+            drop_na() %>% 
+            filter(migrated_from!="TBA") %>% 
             distinct()
 ```
 
-Geocode each from hub.
-*Note: the geocoding process is skipped for the purposes of this notebook*
+- Geocode each from hub.  
 
-```{r geocode_from_hubs}
+```{r geocode_from_hubs, eval=FALSE}
 #hub_from_geo <- geo(hub_from$migrated_from, method = 'osm', full_results = FALSE)
 ```
 
-Attach data back to from hubs.
+- Attach data back to `from_hubs`.
 
-```{r geocode_join}
-# hub_from_join <- hub_from_geo %>% 
-#                   rename(migrated_from = address)
-# 
-# hub_from_join <- partition_statistics %>% 
-#                  left_join(hub_from_join) 
-# 
-# hub_from_join <- hub_from_join %>% 
-#                 select(name,age,migrated_from,gender,occupation,lat,long) %>% 
-#                   distinct()
+```{r geocode_join, eval=FALSE}
+hub_from_join <- hub_from_geo %>%
+  rename(migrated_from = address)
+
+hub_from_join <- partition_statistics %>%
+  left_join(hub_from_join)
+
+hub_from_join <- hub_from_join %>%
+  select(name, age, migrated_from, gender, occupation, lat, long) %>%
+  filter(migrated_from != "TBA") %>%
+  drop_na(migrated_from) %>%
+  distinct()
 ```
 
+- Write from_hub file for geoprocessing.
 
-Write from_hub file for geoprocessing.
-```{r}
-#write_csv(hub_from_join,"from_hubs.csv")
+```{r eval=FALSE}
+write_csv(hub_from_join,"data/from_hubs.csv")
 ```
 
-TODO: Clean partition locations Chandni Chowk is off the entire process needs to be run again
+- `osm` Will not necessarily catch all locations. Some of these have to be hand coded.
 
+```{r read_new_from_hubs}
+hub_from_join_clean <- read_csv("data/from_hubs_clean.csv")
+```
 
+- Create line geometry for departure locations to Delhi.
 
+```{r eval=FALSE}
+hub_from_join_clean <- hub_from_join_clean %>% 
+mutate(WKT = paste("LINESTRING(",long," ", lat, ",", "","77.2219388","28.6517178)")) 
+write_csv(hub_from_join_clean, "data/hubs_to_delhi.csv") 
+```
 
+- Measure distance from `from_hub` to Pakistan border using the [NNjoin](http://arken.nmbu.no/~havatv/gis/qgisplugins/NNJoin/) plugin for QGIS.
+
+```{r import_distance_values}
+distance_to_border <- read_csv("data/distance_to_border.csv")
+```
+
+#### Evaluating distance to border
+
+```{r border_statistics}
+#Get the mean distance by gender
+group_mean <- distance_to_border %>%
+  group_by(gender) %>%
+  summarise(grp_mean = mean(distance_km),
+            group_median = median(distance_km))
+
+#Get percentage of people who travelled more than 100km
+more_than_100 <- distance_to_border %>%
+  mutate(n = n()) %>%
+  filter(distance_km > 100)  %>%
+  summarise(more_than = n() / n) %>%
+  distinct()
+```
+
+The path of travel to the border was quite distant for the majority of interviewees. With men and women both traveling more than 100km on average, and the median distance also exceeding 100km (women = `r round(group_mean[1,3],0)`km, men = `r round(group_mean[2,3],0)`km). Even though it is a rather arbitrary distance, the majority of people (`r round(more_than_100[1,1]*100,0)`%) traveled more than 100km to get to the border. The sense that the majority interviewees travelled from quite far to even get to the border is also born out in the distribution of distances travelled. 
+
+```{r border_histogram, fig.cap="Figure 3: Distribution of Distance to Border"}
+distance_to_border %>%
+  group_by(gender) %>%
+  ggplot(aes(distance_km, fill = gender)) +
+  geom_histogram(
+    color = "black",
+    opacity = .8 ,
+    alpha = .4,
+    position = "identity"
+  ) +
+  scale_color_brewer(palette = "Pastel2") +
+  scale_fill_brewer(palette = "Pastel2") +
+  labs(title = "Histogram of Distance to Border by Gender",
+       x = "Distance in km",
+       y = "Count",
+       fill = "Gender") +
+  facet_wrap(~ gender) +
+  theme_classic() +
+  geom_vline(data = group_mean,
+             aes(xintercept = grp_mean, color = gender),
+             linetype = "dashed") +
+  theme(legend.position = "none") +
+  geom_text(data = group_mean,
+            aes(
+              x = grp_mean,
+              y = 0,
+              label = paste("Mean Distance = ", round(grp_mean, 0), "km"),
+              hjust = -.05,
+              vjust = -22
+            ))
+```
 

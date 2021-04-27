@@ -1,0 +1,92 @@
+fid,name,age,migrated_from,gender,occupation,lat,long,weight,OBJECTID,CNTRY_NAME,join_OBJECTID,join_CNTRY_NAME,distance,distance_km
+"2",Kamlesh Sharma,"8","Baffa, Khyber Pakhtunkhwa Province, Pakistan",Female,Not Mentioned,34.4365258,73.2190526,"1","179",Pakistan,"106",India,0.582164141416909,64.7011405129339
+"3",Madan Lal Rishi,"11","Abbottabad, Khyber Pakhtunkhwa Province, Pakistan",Male,Yes,34.1436589,73.2139122,"2","179",Pakistan,"106",India,0.628120104530224,69.8086402973846
+"5",Hukum Chand Malhotra,"17","Multan, Punjab, Pakistan",Male,Yes,30.1979793,71.4724978,"13","179",Pakistan,"106",India,1.68457679138855,187.222180018132
+"8",Narendra Nath Datta,"1","Peshawar, Khyber Pakhtunkhwa Province, Pakistan",Male,Yes,34.0123846,71.5787458,"6","179",Pakistan,"106",India,2.25239289072988,250.328693482829
+"10",Amarjit Singh Sahai,"10","Manga, Punjab, Pakistan",Male,Yes,31.3068812,74.0516469,"1","179",Pakistan,"106",India,0.484953638553503,53.8972624351978
+"12",Vensimal G. Bhagchandani,"11","Bubak, Sindh, Pakistan",Male,Yes,26.4455412,67.7213624,"1","179",Pakistan,"106",India,1.80325147720954,200.411565925591
+"13",Yash Pal Barara,"9","Muchaka, Sargodha, Punjab, Pakistan",Male,Yes,32.0789157,72.6648,"1","179",Pakistan,"106",India,1.74852914508282,194.329780655359
+"14",Pritam Singh Mahna,"9","Bhutta, Pakistan",Male,Yes,30.1740203,71.4549129,"1","179",Pakistan,"106",India,1.6742858320362,186.078453086672
+"16",Bhagwan Ambawani,age not available,"Nawabshah, Sindh, Pakistan",Male,Yes,26.2452915,68.4040229,"1","179",Pakistan,"106",India,1.21491599361259,135.02454861411
+"17",Krishna Godavani,age not available,"Gujrat, Punjab, Pakistan",Female,Yes,32.5686782,74.071481,"3","179",Pakistan,"106",India,0.351125513791721,39.023738477298
+"18",Manghan Hiranand Manwani,"21","Khipro, Sindh, Pakistan",Male,Yes,25.8273375,69.3757258,"1","179",Pakistan,"106",India,0.72963734523621,81.0911649122072
+"19",Ramchand Thawani,"11","Halani, Sindh, Pakistan",Male,Yes,27.0862451,68.3202574,"1","179",Pakistan,"106",India,1.19198952294018,132.476523590048
+"20",Ramesh Chander Khurana,"11","Jhang Mahgiana, Punjab, Pakistan",Male,Yes,31.2751717,72.2969913,"2","179",Pakistan,"106",India,1.72811741134653,192.061240979643
+"21",Ramesh Chugh,"10","Farooka, Punjab, Pakistan",Male,Yes,31.8851682,72.4080802,"1","179",Pakistan,"106",India,2.06996135143354,230.053434636972
+"23",Harcharan Singh,"9","Bangla, Akhoda, India",Male,Yes,31.7899564,74.2230247,"1","179",Pakistan,"106",India,0.274361077706384,30.4922158152098
+"26",Govind Kakkar,"20","Rawalpindi, Punjab, Pakistan",Male,Yes,33.6038766,73.048136,"32","179",Pakistan,"106",India,0.940371242078701,104.511919473385
+"27",Janakraj Kapoor,"23","Lahore, Punjab, Pakistan",Male,Yes,31.5656822,74.3141829,"77","179",Pakistan,"106",India,0.224169624503036,24.9139878976429
+"29",Pramilla Nayer,"10","Hoti Mardan, Pakistan",Female,Yes,34.2089045,72.040358,"1","179",Pakistan,"106",India,1.76963863488749,196.675868242761
+"30",Janki Devi,"13","Dera Ismail Khan, Khyber Pakhtunkhwa Province, Pakistan",Female,Yes,31.827527,70.9090919,"11","179",Pakistan,"106",India,3.12160761289483,346.932348489519
+"31",Chaman Lal Gupta,"14","Kotli, Azad Kashmir, Pakistan",Male,Yes,33.5216412,73.9076096,"1","179",Pakistan,"106",India,0.159475244279085,17.7239191739333
+"34",Desraj Chhabra,age not available,"Pakpattan, Punjab, Pakistan",Male,Yes,30.3422503,73.3891875,"1","179",Pakistan,"106",India,0.37281493689721,41.434279271819
+"39",Kailash Bhaduria,"8","Faisalabad, Punjab, Pakistan",Female,Yes,31.4220558,73.0923253,"12","179",Pakistan,"106",India,1.26179938812004,140.235122196274
+"47",Prem Prakash Sharma,"8","Muzaffargarh, Punjab, Pakistan",Male,Yes,30.0778083,71.1888419,"3","179",Pakistan,"106",India,1.76449609959913,196.104332013348
+"48",Ramkumari Kakar,"19","Attock, Punjab, Pakistan",Female,Not Mentioned,33.7695323,72.3610911,"1","179",Pakistan,"106",India,1.55857212811125,173.218147746156
+"49",Shanti Devi,"18","Sargodha, Punjab, Pakistan",Female,Not Mentioned,32.0898005,72.6782574,"5","179",Pakistan,"106",India,1.73122090241015,192.406159872961
+"51",Sudesh Suri,"6","Jhelum, Punjab, Pakistan",Female,Yes,32.9247256,73.719388,"2","179",Pakistan,"106",India,0.396864282458673,44.1070994881744
+"55",Pritam Dass Batra,"14","Jhang, Punjab, Pakistan",Male,Yes,33.6748125,72.6963493,"5","179",Pakistan,"106",India,1.28042232228576,142.304856476517
+"59",Amar Singh Takkar,"26","Chak 30, Punjab, Pakistan",Male,Yes,32.3731416,73.1772138,"1","179",Pakistan,"106",India,1.16931410638486,129.956400469507
+"60",Amarjit Kour Itten,"11","Quetta, Balochistan, Pakistan",Female,Not Mentioned,30.1957677,67.0172447,"5","179",Pakistan,"106",India,3.90941717261198,434.488715146922
+"63",Avtar Singh,"23","Sakhwal, Punjab, Pakistan",Male,Yes,33.3386803,72.5575971,"1","179",Pakistan,"106",India,1.45745936003296,161.980575814703
+"71",Brij Aghi,"8","Toba Tek Singh, Punjab, Pakistan",Male,Yes,30.9777056,72.4860799,"1","179",Pakistan,"106",India,1.37904269769701,153.265426379348
+"74",Darshan Singh Dham,"12","Malakwal, Punjab, Pakistan",Male,Yes,32.5535526,73.2057254,"1","179",Pakistan,"106",India,1.02968033887915,114.437643182689
+"77",Gian Chand Ahuja,"14","Chiniot, Punjab, Pakistan",Male,Yes,31.7219942,72.9800348,"1","179",Pakistan,"106",India,1.50869663841131,167.675035696395
+"78",Gokachand,"8","Shorkot, Punjab, Pakistan",Male,Yes,30.8349067,72.0764093,"1","179",Pakistan,"106",India,1.59410242490929,177.166949401993
+"83",Inderjeet Singh Luthra,"13","Sialkot, Punjab, Pakistan",Male,Yes,32.4935378,74.5411575,"8","179",Pakistan,"106",India,0.138516365646906,15.3945703616314
+"90",Kalpana Nandi,"18","Dhobimandi, Lahore, Pakistan",Female,Not Mentioned,31.4846373,74.3064137,"1","179",Pakistan,"106",India,0.274762048788306,30.5367793402836
+"94",Krishnavanti,"8","Gujranwala, Punjab, Pakistan",Female,Yes,32.1525312,74.1933745,"8","179",Pakistan,"106",India,0.494612895293716,54.9707825700483
+"97",Mohinder Singh Miglani,"22","Jaranwala, Punjab, Pakistan",Male,Yes,31.3330181,73.4183387,"1","179",Pakistan,"106",India,0.967531842689857,107.530521464708
+"103",Nirmal Saini,"16","Lala Musa, Punjab, Pakistan",Female,Not Mentioned,32.6997915,73.9586957,"1","179",Pakistan,"106",India,0.388575933444315,43.1859406670677
+"104",Nirmala Sharma,"6","Mirpur, Azad Kashmir, Pakistan",Female,Not Mentioned,33.1486351,73.7482102,"1","179",Pakistan,"106",India,0.270826771585935,30.0994165672892
+"111",Pushpa Taneja,"21","Sheikhupura, Punjab, Pakistan",Female,Not Mentioned,31.7085285,73.9864014,"2","179",Pakistan,"106",India,0.502499768145647,55.8473217319391
+"112",Pyara Singh,"15","Azimabad, Punjab, Pakistan",Male,Not Mentioned,34.6103365,72.028419,"1","179",Pakistan,"106",India,1.78422471645258,198.296950761823
+"117",Rajinder Kaur Sehgal,"8","Pind Dadan Khan, Punjab, Pakistan",Female,Not Mentioned,32.5939485,73.0459834,"1","179",Pakistan,"106",India,1.13863936845485,126.547240770704
+"121",Sarla Kalra,"17","Dera Ghazi Khan, Punjab, Pakistan",Female,Yes,30.0321374,70.6401114,"5","179",Pakistan,"106",India,1.99297375293962,221.497109927956
+"122",Satinder Chadha,"7","Gota Sarhaj, Narowal, Sialkot, Pakistan",Male,Yes,32.10180998,74.87946164,"1","179",Pakistan,"106",India,0.0573349531112819,6.37214935383475
+"123",Satya Mehta,"10","Kalyal Bansi, Mirpur District, Azad Kashmir, Pakistan",Female,Not Mentioned,33.1712698,73.8550737,"1","179",Pakistan,"106",India,0.161600334946108,17.9600996255755
+"131",Surendra Mohan Rikhye,"8","Mangoki, Punjab, Pakistan",Male,Yes,31.9074301,74.0243046,"1","179",Pakistan,"106",India,0.500228712759631,55.5949189073927
+"132",Surinder Kaur,"14","Chuharkana, Punjab, Pakistan",Female,Not Mentioned,31.7474898,73.7768416,"1","179",Pakistan,"106",India,0.712360767039377,79.1710632879893
+"138",Vas Dev Mehta,"10","Dunyapur, Punjab, Pakistan",Male,Not Mentioned,29.802535,71.7419973,"1","179",Pakistan,"106",India,1.20619924081844,134.055777425321
+"139",Vidya Mitter Thukral,"10","Baddomalhi, Punjab, Pakistan",Male,Not Mentioned,31.889771,74.5189872,"1","179",Pakistan,"106",India,0.0764880097933249,8.50080092042033
+"142",Salochana Sehgal,"10","Mardan, Khyber Pakhtunkhwa Province, Pakistan",Female,Not Mentioned,34.1937969,72.0451467,"2","179",Pakistan,"106",India,1.76655598018354,196.333265081618
+"147",Savitri Goyal,"16","Bannu, Khyber Pakhtunkhwa Province, Pakistan",Female,Yes,32.8988666,70.68663999,"1","179",Pakistan,"106",India,3.3402489779456,371.231931159897
+"151",Yash Oberoi,"10","Nowshera, Khyber Pakhtunkhwa Province, Pakistan",Male,Yes,34.0155606,71.981283,"2","179",Pakistan,"106",India,1.85504134706179,206.1674402711
+"152",Chandra Mani Thukral,"16","Kunjah, Punjab, Pakistan",Male,Yes,32.52999,73.9742317,"1","179",Pakistan,"106",India,0.451683243738333,50.1996240258346
+"154",Krishna Lal Sethi,"24","Gujjar Khan, Punjab, Pakistan",Male,Yes,33.2864257,73.3481508,"1","179",Pakistan,"106",India,0.665202355255602,73.9299245607524
+"157",Surender Kumar Malhotra,"8","Bathuni, Punjab, Pakistan",Male,Yes,32.3835134,72.74914166,"1","179",Pakistan,"106",India,1.50179468327459,166.907959304455
+"158",Virender Bahl,"6","Hanu ka Chajja, Multan, West Pakistan",Male,Yes,30.15687324,71.52546281,"1","179",Pakistan,"106",India,1.62140968474387,180.201850952749
+"160",Kuldip Sachar Singh,"22","Pindigheb, Punjab, Pakistan",Male,Yes,33.24608878,72.26420765,"1","179",Pakistan,"106",India,1.74720891671807,194.18305179513
+"161",Jaswant Singh,"14","Muzaffarabad, Azad Kashmir, Pakistan",Male,Yes,34.3734751,73.4702407,"2","179",Pakistan,"106",India,0.33054970529112,36.7369636963498
+"162",Rewa Chand Thakur,"11","Hyderabad, Sindh, Pakistan",Male,Yes,25.3801017,68.3750376,"1","179",Pakistan,"106",India,1.12529138803398,125.063759574709
+"164",Amrit Sethi,"9","Bahawalpur, Punjab, Pakistan",Female,Yes,29.394644,71.6638747,"4","179",Pakistan,"106",India,0.94755526191913,105.31034425443
+"167",Dharam Vir Suri,"10","Dera Nawab Sahib, Punjab, Pakistan",Male,Not Mentioned,28.9655721,70.3486048,"1","179",Pakistan,"106",India,0.929451850479093,103.298349210396
+"169",Ram Lal Saneja,"15","Karachi, Sindh, Pakistan",Male,Yes,24.8667795,67.0311286,"6","179",Pakistan,"106",India,1.54813056153383,172.057682478309
+"170",Ram Swaroop Rewari,"16","Bahawalnagar, Punjab, Pakistan",Male,Yes,29.9935922,73.2527621,"1","179",Pakistan,"106",India,0.153392594124477,17.0478995184003
+"174",Gopal Krishan Malik,"14","Loralai, Balochistan, Pakistan",Male,Yes,30.366865,68.6000654,"1","179",Pakistan,"106",India,2.93836310930597,326.566737605156
+"175",Kuldip Raj Joshi,"13","Ikhlaspur, Punjab, Pakistan",Male,Not Mentioned,32.2676824,75.278294,"1","179",Pakistan,"106",India,0.058315232251266,6.48109659717346
+"181",Surjit Kaur,"16","Mitranwali, Sialkot, Pakistan",Female,Not Mentioned,32.3663582,74.2361078,"1","179",Pakistan,"106",India,0.428058943915245,47.5740429677964
+"186",Sudarshan Lal Sonik,"16","Daska, Punjab, Pakistan",Male,Not Mentioned,32.3353965,74.3540308,"1","179",Pakistan,"106",India,0.372176614325358,41.363336739506
+"193",Jagdish Narain Batra,"9","Sainchawala, Punjab, Pakistan",Male,Not Mentioned,30.0638849,72.392596,"1","179",Pakistan,"106",India,0.991379952206147,110.180976508239
+"194",Daljit Singh,"5","Sahiwal, Punjab, Pakistan",Male,Yes,30.6715098,73.1110572,"1","179",Pakistan,"106",India,0.782353792120149,86.9500181024412
+"199",Harinder Kaur,"15","Chakbedi, Punjab, Pakistan",Female,Not Mentioned,30.4857809,73.4939017,"1","179",Pakistan,"106",India,0.386731735253788,42.9809783243707
+"200",Krishan Lal Dua,"9","Faruka, Punjab, Pakistan",Male,Yes,31.88673411,72.41665045,"1","179",Pakistan,"106",India,2.06231022864942,229.203096501868
+"207",Manmohan Singh Manchanda,"11","Khanewal, Punjab, Pakistan",Male,Yes,30.3022528,71.9278916,"2","179",Pakistan,"106",India,1.50771149281728,167.56554760022
+"222",Manjit (Dugal) Kirpal Singh,"15","Dugalpura, Punjab, Pakistan",Female,Not Mentioned,33.581389,73.043889,"2","179",Pakistan,"106",India,0.947206687977983,105.271604095185
+"224",Kishan Hotchand Ramchandani,"10","Tando Allahyar, Sindh, Pakistan",Male,Yes,25.2934734,68.6095986,"1","179",Pakistan,"106",India,0.976438816843928,108.520433665217
+"229",Anonymous,age not available,"Sarsava, Mirpur, Pakistan",Male,Yes,33.10190027,73.76761668,"1","179",Pakistan,"106",India,0.265178478804911,29.471670955899
+"232",Amrit Chugh,"13","Sadiq Nehang, Punjab, Pakistan",Male,Yes,30.9418381,72.1500694,"1","179",Pakistan,"106",India,1.59818491804208,177.620673606279
+"235",Baldev Raj Kalra,"12","Chunian, Punjab, Pakistan",Male,Yes,30.9631954,73.9807183,"1","179",Pakistan,"106",India,0.328380856840449,36.4959200483907
+"237",Bishandas Chhabra,"23","Pindi Bhattian, Punjab, Pakistan",Male,Yes,31.9000019,73.2713766,"1","179",Pakistan,"106",India,1.23035907841455,136.740877615915
+"241",Chandra Prakash Gulati,"15","Hafizabad, Punjab, Pakistan",Male,Yes,32.072546,73.6857558,"1","179",Pakistan,"106",India,0.876321786400989,97.3935270188195
+"244",Girish Taneja,"3","Larkana, Sindh, Pakistan",Female,Yes,27.5564798,68.2101509,"1","179",Pakistan,"106",India,1.41573723399329,157.343620448781
+"245",Gopal Das Taneja,"21","Kulachi, Khyber Pakhtunkhwa Province, Pakistan",Male,Yes,31.9299926,70.4592265,"1","179",Pakistan,"106",India,3.54717451086935,394.229427963508
+"247",Hariram Hiranandani,"22","Sukkur, Sindh, Pakistan",Male,Yes,27.6961883,68.8588754,"2","179",Pakistan,"106",India,0.890881495626557,99.0116785424399
+"255",Krishan Lal Saluja,"15","Qadirabad, Punjab, Pakistan",Male,Yes,32.0568508,72.7217587,"1","179",Pakistan,"106",India,1.7191600099832,191.065724349522
+"257",Laxman Bhatia,"11","Kandiaro, Sindh, Pakistan",Male,Yes,27.0594568,68.2103517,"1","179",Pakistan,"106",India,1.29692753509981,144.139229323457
+"260",Om Parkash Arora,"9","Vehari, Punjab, Pakistan",Male,Yes,30,72.333333,"1","179",Pakistan,"106",India,1.02740310457004,114.18455363881
+"263",Om Prakash Sapra,"15","Okara, Punjab, Pakistan",Male,Yes,30.8091281,73.4493301,"1","179",Pakistan,"106",India,0.59594686484777,66.2329386123163
+"271",Sarwan Singh Lamba,"15","Khaur, Punjab, Pakistan",Male,Yes,33.2654556,72.4633816,"1","179",Pakistan,"106",India,1.54829578012128,172.076044706899
+"279",Sheila Devi Kalra,"18","Mianwali, Punjab, Pakistan",Female,Not Mentioned,32.5705533,71.5239763,"1","179",Pakistan,"106",India,2.56879602081882,285.493420957783
+"284",Sudesh Jain,"4","Pasrur, Punjab, Pakistan",Female,Not Mentioned,32.2638734,74.662699,"1","179",Pakistan,"106",India,0.216298375831969,24.0391851915892
+"302",Jaspal Singh Sethi,"12","Gujarkhan, Rawalpindi, Pakistan",Male,Not Mentioned,33.2138788,73.1584259,"1","179",Pakistan,"106",India,0.853225288833615,94.8266053756792
