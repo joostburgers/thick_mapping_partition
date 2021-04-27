@@ -161,11 +161,14 @@ Generate a table for all analysis: only include non-administrative areas, unique
 
 ```{r add_location_totals}
 partition_statistics <- partition_clean %>%
+  rename(latitude=9) %>%
+  rename(longitude=10) %>% 
   filter(admin == FALSE) %>%
    filter(occupation!="No") %>% 
-  group_by(name) %>%
+    mutate(PersonID = paste(name,"_",age)) %>% 
+  group_by(PersonID) %>% 
   distinct() %>%
-  add_count(name, name = "loc_by_name") %>%
+  add_count(PersonID, name = "loc_by_name") %>%
   ungroup() %>%
   add_count(resolved_location, name = "loc_total")
 ```
@@ -184,7 +187,7 @@ unique_locations <- partition_statistics %>%
 #Get number of unique people
 unique_people <- partition_statistics %>%
   ungroup() %>%
-  select(name, gender) %>%
+  select(PersonID) %>%
   distinct() %>%
   nrow()
 
@@ -249,7 +252,7 @@ Generally, men mentioned their occupations significantly more than women.
 ```{r occupation_gender_table, fig.cap="Percentage breakdown of each group"}
 partition_statistics %>% 
   group_by(gender) %>%
-  select(name, gender, occupation) %>% 
+  select(PersonID, gender, occupation) %>% 
   distinct() %>% 
   count(occupation) %>% 
   mutate(percent = paste(round(n/sum(n),2)*100,"%")) %>% 
@@ -264,7 +267,7 @@ The distribution pattern of locations mentioned shows that men without occupatio
 
 ```{r histogram_mean_locations, fig.cap="Figure 1: Locations Mentioned by Occupation and Gender"}
 partition_statistics %>%
-  distinct(name, gender, occupation, loc_by_name) %>%
+  distinct(PersonID, gender, occupation, loc_by_name) %>%
   ggplot(aes(loc_by_name, fill = gender)) +
   geom_histogram(
     color = "black",
@@ -323,14 +326,14 @@ The spatial analysis of the data set was done with QGIS. As these manipulations 
 part_from <- partition_statistics %>%
   mutate(migrated_from = str_extract(migrated_from, "[^,]+")) %>%
   drop_na(migrated_from) %>%
-  select(name, migrated_from, gender)  %>%
-  distinct(name, migrated_from, gender) %>%
+  select(PersonID, migrated_from, gender)  %>%
+  distinct(PersonID, migrated_from, gender) %>%
   add_count(migrated_from, name = "total_location") %>%
   group_by(gender) %>%
   add_count(migrated_from, name = "loc_gender") %>%
   add_count(gender, name = "gender_tot") %>%
   mutate(percent = loc_gender / gender_tot) %>%
-  select(-name,-loc_gender,-gender_tot) %>%
+  select(-PersonID,-loc_gender,-gender_tot) %>%
   distinct() %>%
   #ungroup() %>%
   arrange(desc(total_location), gender) %>%
@@ -385,7 +388,7 @@ partition_transfer <- partition_statistics %>%
   
   #Get the number of transfer locations based on where people migrated from and their gender
   group_by(gender) %>%
-  mutate(total_gender = n_distinct(name)) %>%
+  mutate(total_gender = n_distinct(PersonID)) %>%
   group_by(migrated_from, gender) %>%
   add_count(resolved_location, name = "migration_location", sort =
               TRUE) %>%
@@ -534,4 +537,20 @@ distance_to_border %>%
               vjust = -22
             ))
 ```
+
+
+#### Analyzing Hub and Spokes Model
+
+Using QGIS it is possible to take all of the locations in each narrative and attach them to a central hub in this case Delhi.
+
+
+```{r}
+to_hubs <- partition_statistics  %>% 
+  filter(resolved_location!="Delhi") %>% 
+mutate(WKT = paste("LINESTRING(",longitude," ", latitude, ",", "","77.2219388","28.6517178)"))  %>% 
+  select(name,age,gender,occupation,resolved_location,migrated_from,migrated_to,PersonID,loc_by_name,loc_total,WKT)
+write_csv(to_hubs, "data/hub_and_spoke.csv")
+```
+
+
 
