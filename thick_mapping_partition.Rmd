@@ -553,4 +553,5 @@ write_csv(to_hubs, "data/hub_and_spoke.csv")
 ```
 
 
+![Figure 4: Locations Mentioned in the Interviews](images/hub_and_spokes.png)
 
