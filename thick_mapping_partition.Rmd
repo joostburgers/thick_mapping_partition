@@ -496,7 +496,11 @@ group_mean <- distance_to_border %>%
   summarise(grp_mean = mean(distance_km),
             group_median = median(distance_km))
 
-#Get percentage of people who travelled more than 100km
+total_mean <- distance_to_border %>% 
+  ungroup() %>% 
+  summarise(grp_mean = mean(distance_km))
+
+#Get percentage of people who traveled more than 100km
 more_than_100 <- distance_to_border %>%
   mutate(n = n()) %>%
   filter(distance_km > 100)  %>%
@@ -504,7 +508,7 @@ more_than_100 <- distance_to_border %>%
   distinct()
 ```
 
-The path of travel to the border was quite distant for the majority of interviewees. With men and women both traveling more than 100km on average, and the median distance also exceeding 100km (women = `r round(group_mean[1,3],0)`km, men = `r round(group_mean[2,3],0)`km). Even though it is a rather arbitrary distance, the majority of people (`r round(more_than_100[1,1]*100,0)`%) traveled more than 100km to get to the border. The sense that the majority interviewees travelled from quite far to even get to the border is also born out in the distribution of distances travelled. 
+The path of travel to the border was quite distant for the majority of interviewees. With men and women both traveling more than `r round(total_mean[1,1],0)`km on average, and the median distance also exceeding 100km (women = `r round(group_mean[1,3],0)`km, men = `r round(group_mean[2,3],0)`km). Even though it is a rather arbitrary distance, the majority of people (`r round(more_than_100[1,1]*100,0)`%) traveled more than 100km to get to the border. The sense that the majority interviewees travelled from quite far to even get to the border is also born out in the distribution of distances travelled. 
 
 ```{r border_histogram, fig.cap="Figure 3: Distribution of Distance to Border"}
 distance_to_border %>%
@@ -544,7 +548,7 @@ distance_to_border %>%
 Using QGIS it is possible to take all of the locations in each narrative and attach them to a central hub in this case Delhi.
 
 
-```{r}
+```{r generate_hub_spoke}
 to_hubs <- partition_statistics  %>% 
   filter(resolved_location!="Delhi") %>% 
 mutate(WKT = paste("LINESTRING(",longitude," ", latitude, ",", "","77.2219388","28.6517178)"))  %>% 
@@ -552,6 +556,141 @@ mutate(WKT = paste("LINESTRING(",longitude," ", latitude, ",", "","77.2219388","
 write_csv(to_hubs, "data/hub_and_spoke.csv")
 ```
 
+Visual inspection of the data reveals quite a diversity of locations mentioned. Notably, most of the locations outside of India are those in England and the US. At the regional level it makes sense that the majority of locations mentioned are related to Partition. The intensity of line intersections indicates that these locations predominated the narratives, which, given that they were the core of the interview, makes sense.
+
 
 ![Figure 4: Locations Mentioned in the Interviews](images/hub_and_spokes.png)
 
+
+At the more local level, it is interesting to note that the locations that are mentioned the most are those that were a transit point for refugees, such as the Kingsway Refugee Camp and the camp near Daryaganj, and those neighborhoods that were fundamentally shaped by Partition such as Karol Bagh and Lajpat Nagar. This tracks with the larger understanding of the impact of Partition on Delhi.
+
+![Figure 5: Locations Mentioned in Delhi-NCR](images/delhi_ncr.png)
+
+
+#### Spatial Statistics
+
+- Import spoke distances calculated in QGIS
+
+```{r import_hub_spokes}
+spoke_distance <- read_csv("data/hub_spoke_distance.csv")
+
+```
+
+- Calculate total spoke distance for each person.
+
+```{r spoke_distance_total}
+distance_spokes_total <- spoke_distance %>%
+  filter(migrated_from != "TBA") %>%
+  select(name, age, gender, occupation, PersonID, distance_km) %>%
+  group_by(name, age) %>%
+  mutate(total = round(sum(distance_km))) %>%
+  distinct(name, gender, occupation, total)
+``` 
+
+
+```{r histogram_total_distance, fig.cap="Figure 5: Distribution of Total Spoke Length"}
+distance_spokes_total %>%
+  group_by(gender) %>%
+  ggplot(aes(total, fill = gender)) +
+  geom_histogram(
+    color = "black",
+    opacity = .8 ,
+    alpha = .4,
+    position = "identity"
+  ) +
+  scale_color_brewer(palette = "Pastel2") +
+  scale_fill_brewer(palette = "Pastel2") +
+  labs(title = "Distribution of Total Spoke Length",
+       x = "Distance in km",
+       y = "Count",
+       fill = "Gender") +
+  facet_wrap(~ occupation) +
+  theme_classic() 
+
+```
+
+```{r group_mean_table}
+spokes_mean <- spoke_distance %>%
+  group_by(gender, occupation) %>%
+  summarise(grp_mean = round(mean(distance_km),0))
+
+spokes_mean %>%
+  addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF")) %>% 
+  htmlTable(header = c("Gender", "Occupation", "Mean Total Distance"))
+```
+
+
+#### Domestic and International Locations
+
+Another way to think of the difference between narrating the self is the number of "domestic" and "international" locations. To be sure, the notions of "domestic" and "international" are fluid in the context of Partition. After all, Pakistan and India were "domestic" locations before partition. Perhaps a better way to think of it is to conceive of locations that are inside or outside the South Asian Sub-continent.    
+Using a spatial join in QGIS, all locations that fell within the Sub-continent were labeled "Subcontinent" and all thouse outside were labelled "international." As all the operative narratives were in Bangladesh, India, and Pakistan, these were clubbed togetehr as "Subcontinent"
+
+```{r import_spokes_international}
+spokes_distance_world <- read_csv("data/hub_spoke_distance_international.csv")
+```
+
+With all of the locations by inside and outside the subcontinent, two separate tables were created. One for all the people who mentioned a location outside of the subcontinent at least, irrespective of the fact that they may have mentioned a "domestic" location. Using the `anti_join` function, the values from this table were filtered out of the overall table. This created the domestic table. The counts of these two tables were taken seperately. They were then bound back together.
+
+
+```{r spokes_world}
+spokes_international <- spokes_distance_world %>% 
+                        filter(CNTRY_NAME=="International") %>% 
+                        distinct(PersonID, .keep_all= TRUE) 
+                       
+
+                        
+
+spokes_domestic <-  spokes_distance_world %>% 
+                    filter(CNTRY_NAME=="Subcontinent") %>%   
+                    anti_join(spokes_international, by="PersonID") %>% 
+                      distinct(PersonID, .keep_all=TRUE) %>% 
+                       group_by(gender,occupation, CNTRY_NAME) %>% 
+                           count(name = "total")
+
+spokes_international_count <- spokes_international %>% 
+                            group_by(gender,occupation, CNTRY_NAME) %>% 
+                         count(name = "total")
+
+spokes_by_dom_int <- spokes_international_count %>% 
+                      bind_rows(spokes_domestic) 
+                      
+
+```
+
+The table Subcontinent and International counts were filtered by Gender. The resulting tables were then used to tabulate the percentage of people who mention only subcontinent locations or international locations by occupation.
+
+
+```{r}
+women_dom_int <- spokes_by_dom_int %>% 
+                  filter(gender == "Female") %>% 
+                  select(occupation,CNTRY_NAME,total) %>% 
+                  ungroup() %>% 
+                   mutate(percent= percent(total/sum(total),2)) %>% 
+                    select(-gender) %>% 
+                    arrange(occupation)
+women_dom_int %>% 
+addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF")) %>% 
+htmlTable(
+          header = c("Occupation", "Region", "Total", "Percent"),
+          caption = "Women who mention domestic and international locations by occupation")
+```
+
+
+
+```{r }
+men_dom_int <- spokes_by_dom_int %>% 
+                  filter(gender == "Male") %>% 
+                  select(occupation,CNTRY_NAME,total) %>% 
+                  ungroup() %>% 
+                   mutate(percent= percent(total/sum(total),2)) %>% 
+                    select(-gender) %>% 
+                    arrange(occupation)
+
+men_dom_int %>% 
+addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF")) %>% 
+htmlTable(
+          header = c("Occupation", "Region", "Total", "Percent"),
+          caption = "Men who mention domestic and international locations by occupation")
+```
+
+The results show that while the percentage of women who do not mention an occupation, but who do mention an international location is significantly higher than men who do not mention an occupation and mention an international location. Conversely, men who mention an international location tend to mention their occupation as well. 
