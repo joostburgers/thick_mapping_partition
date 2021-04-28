@@ -1,4 +1,4 @@
-# Thick Mapping Partition
+# Partitioned Narratives: Thick Mapping the *1947 Partition Archive*
 ## Johannes Burgers and Saanchi Ahuja
 
 ### Introduction
