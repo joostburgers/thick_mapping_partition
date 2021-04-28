@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE, error=FALSE)
 
 ## Introduction
 
-The documentation below is the white paper for the essay: "Partitioned Narratives: Thick Mapping the *1947 Partition Archive*." It includes the R code and csv files necessary to reproduce the calculations. Some of the spatial manipulations were performed in QGIS 3.16 (Hannover). When possible, images and Python code chunks have provided for reproduceability. Some steps involved converting CSV files to Geopackage files, as this is a common GIS workflow it has been skipped.
+The documentation below is the white paper for the essay: "Partitioned Narratives: Thick Mapping the *1947 Partition Archive*." It includes the R code and csv files necessary to reproduce the calculations. Some of the spatial manipulations were performed in QGIS 3.16 (Hannover). Images of the results have been provided to complement the paper. Some steps involved converting CSV files to Geopackage files, as this is a common GIS workflow it has been skipped.
 
 ## Part 1: Priming the NER Extracted Data
 
@@ -689,7 +689,7 @@ distribution_table %>%
                     pos.caption = "bottom") %>%
   htmlTable(
     header = c("Value", "Min.", "1st Qu.", "Median", "Mean", "3rd Qu.", "Max"),
-    caption = "Table 8: Distribution of Total and Mean distance"
+    caption = "Table 7: Distribution of Total and Mean distance"
   )
 ```
 
@@ -725,7 +725,7 @@ spokes_mean %>%
                     pos.caption = "bottom") %>%
   htmlTable(
     header = c("Gender", "Occupation", "Mean Total Distance"),
-    caption = "Table 7: Mean Total Distance by Gender and Occupation"
+    caption = "Table 8: Mean Total Distance by Gender and Occupation"
   )
 ```
 
