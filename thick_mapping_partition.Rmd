@@ -35,7 +35,7 @@ library(scales)
 
 #### Load location data
 
-The loaded csv file is a cleaned up version of the one that results from scraping and running the data through NER. The cleaning process mostly involves removing false positives, consolidating similar locations (i.e. Bombay and Mumbai), and removing any corrupt data. This process also included coding the gender of the narrative and whether a person mentioned their occupation. Finally, for less known or ambigious locations we added the city and district to aid the geotagger. 
+The loaded csv file is a cleaned up version of the one that results from scraping and running the data through NER. The cleaning process mostly involves removing false positives, consolidating similar locations (i.e. Bombay and Mumbai), and removing any corrupt data. This process also included coding the gender of the interviewee and whether a person mentioned their occupation. Finally, for less known or ambiguous locations we added the city and district to aid the geotagger. 
 
 ```{r load_partition_locations}
 partition_df <- read_csv("data/post_clean_locations.csv", na = c("", "NA"))
@@ -95,7 +95,7 @@ The script relies on the `tidygeocoder` package developed by Jesse Cambon, Diego
 #addresses_geocoded <- geo(addresses$address, method = 'osm', full_results = FALSE)
 ```
 
-##### Skip geocoding and read in the geocoded addresses
+*Note: the geocoding has been skipped. Instead the saved locations are read in as a csv file*
 
 ```{r}
 addresses_gecoded <- read_csv("data/addresses_geocoded.csv")
@@ -143,14 +143,11 @@ partition_clean <-
 
 ```{r create_data_labels, echo=FALSE}
 #This is not a necessary step, but it helps make for cleaner charts.
-
- 
 partition_clean$occupation <- factor(partition_clean$occupation,
-labels = c("No", "Not Mentioned", "Yes"))
+                                     labels = c("No", "Not Mentioned", "Yes"))
 
 partition_clean$gender <- factor(partition_clean$gender,
-labels = c("Female", "Male"))
-
+                                 labels = c("Female", "Male"))
 ```
 
 
@@ -161,12 +158,13 @@ Generate a table for all analysis: only include non-administrative areas, unique
 
 ```{r add_location_totals}
 partition_statistics <- partition_clean %>%
-  rename(latitude=9) %>%
-  rename(longitude=10) %>% 
+  rename(latitude = 9) %>%
+  rename(longitude = 10) %>%
   filter(admin == FALSE) %>%
-   filter(occupation!="No") %>% 
-    mutate(PersonID = paste(name,"_",age)) %>% 
-  group_by(PersonID) %>% 
+  filter(occupation != "No") %>%
+  #Generating a unique personID helps maintain avoid double counting of people with the same name.
+  mutate(PersonID = paste(name, "_", age)) %>%
+  group_by(PersonID) %>%
   distinct() %>%
   add_count(PersonID, name = "loc_by_name") %>%
   ungroup() %>%
@@ -175,7 +173,7 @@ partition_statistics <- partition_clean %>%
 
 #### General Overview
 
-```{r general_overview, ECHO= FALSE}
+```{r general_overview, echo= FALSE}
 #Get number of unique locations
 
 unique_locations <- partition_statistics %>%
@@ -187,9 +185,15 @@ unique_locations <- partition_statistics %>%
 #Get number of unique people
 unique_people <- partition_statistics %>%
   ungroup() %>%
-  select(PersonID) %>%
+  select(gender, age, name) %>%
   distinct() %>%
   nrow()
+
+
+#Ratio of men and women.
+men_women <- partition_statistics %>%
+  distinct(name, age, gender) %>%
+  count(gender)
 
 #Calculate mean locations mentioned
 mean_locations <- partition_statistics %>%
@@ -197,7 +201,7 @@ mean_locations <- partition_statistics %>%
   summarize(mean_locations = mean(loc_by_name))
 ```
 
-There are `r unique_locations` unique locations in the data set. These are distributed across `r unique_people` people. On average, each person mentions `r round(mean_locations,2)` locations. 
+There are `r unique_locations` unique locations in the data set. These are distributed across `r unique_people` people (men = `r men_women[2,2]`, women = `r men_women[1,2]`). On average, each person mentions `r round(mean_locations,2)` locations. 
 
 #### Locations by gender
 
@@ -210,13 +214,15 @@ mean_locations_gender <- partition_statistics %>%
   summarize(mean_gender = round(mean(loc_by_name), 2))
 
 mean_locations_gender %>%
-  addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF")) %>% 
-  htmlTable(header = c("Gender", "Mean Locations Mentioned"))
+  addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF"),
+                    pos.caption = "bottom") %>%
+  htmlTable(header = c("Gender", "Mean Locations Mentioned"),
+            caption = "Table 1: Mean Locations Mentioned by Gender")
 ```
 
 #### Locations by occupation
 
-A similar trend emerges when accounting for occupation. Here, people who mention their occupation mention more locations.
+A similar trend emerges when accounting for occupation. Here, people who mention their occupation also mention more locations.
 
 ```{r locations_by_occupation, message=TRUE}
 mean_locations_occupation <- partition_statistics %>%
@@ -224,14 +230,16 @@ mean_locations_occupation <- partition_statistics %>%
   summarize(mean_occupation = round(mean(loc_by_name), 2))
 
 mean_locations_occupation %>%
-  addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF")) %>% 
-  htmlTable(header = c("Occupation", "Mean Locations Mentioned"))
+  addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF"),
+                    pos.caption = "bottom") %>%
+  htmlTable(header = c("Occupation", "Mean Locations Mentioned"),
+            caption = "Table 2: Mean Locations Mentioned by Occupation")
 ```
 
 
 #### Locations by occupation and gender
 
-The contrast between locations mentioned and the gender and whether occupation is mentioned becomes even starker when the values are disaggregated.
+The contrast between locations mentioned and gender even starker when the values are disaggregated.
 
 ```{r locations_occupation_gender}
 mean_locations_occ_gen <- partition_statistics %>%
@@ -240,30 +248,38 @@ mean_locations_occ_gen <- partition_statistics %>%
 ```
 
 ```{r locations_occupation_gender_table, message = TRUE}
-mean_locations_occ_gen %>% 
-   addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF")) %>% 
-          htmlTable(header = c("Gender", "Occupation", "Mean Locations Mentioned" ))
+mean_locations_occ_gen %>%
+  addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF"),
+                    pos.caption = "bottom") %>%
+  htmlTable(
+    header = c("Gender", "Occupation", "Mean Locations Mentioned"),
+    caption = "Table 3: Mean Locations Mentioned by Occupation and Gender"
+  )
 ```
 
 #### Percent mention of occupation by gender
 
 Generally, men mentioned their occupations significantly more than women.
 
-```{r occupation_gender_table, fig.cap="Percentage breakdown of each group"}
-partition_statistics %>% 
+```{r occupation_gender_table}
+partition_statistics %>%
   group_by(gender) %>%
-  select(PersonID, gender, occupation) %>% 
-  distinct() %>% 
-  count(occupation) %>% 
-  mutate(percent = paste(round(n/sum(n),2)*100,"%")) %>% 
-  addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF")) %>% 
-  htmlTable(header = c("Gender", "Occupation", "Number of People", "Percent" ))
+  select(PersonID, gender, occupation) %>%
+  distinct() %>%
+  count(occupation) %>%
+  mutate(percent = paste(round(n / sum(n), 2) * 100, "%")) %>%
+  addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF"),
+                    pos.caption = "bottom") %>%
+  htmlTable(
+    header = c("Gender", "Occupation", "Number of People", "Percent"),
+    caption = "Table 4: Percent Mention Occupation by Gender"
+  )
 ```
 
 
 #### Distribution of locations mentioned
 
-The distribution pattern of locations mentioned shows that men without occupations make a negligible impact on the mean number of locations mentioned. Meanwhile, the number of women without occupations is quite substantial and do tend to mention fewer locations. Even among those who mentione their occupation, the men's distribution has a longer tail.
+The distribution pattern of locations mentioned shows that men without occupations make a negligible impact on the mean number of locations mentioned. Meanwhile, the number of women without occupations is quite substantial and do tend to mention fewer locations. Even among those who mentioned their occupation, the men's distribution has a longer tail.
 
 ```{r histogram_mean_locations, fig.cap="Figure 1: Locations Mentioned by Occupation and Gender"}
 partition_statistics %>%
@@ -272,7 +288,7 @@ partition_statistics %>%
   geom_histogram(
     color = "black",
     opacity = .8 ,
-    alpha = .4,
+    alpha = .3,
     position = "identity"
   ) +
   scale_fill_brewer(palette = "Pastel2") +
@@ -280,9 +296,8 @@ partition_statistics %>%
        x = "Occupation",
        y = "Number of Locations Mentioned",
        fill = "Gender") +
-  facet_wrap(~ occupation) +
+  facet_wrap( ~ occupation) +
   theme_classic()
-  
 ```
 
 ### T-test and ANOVA score
@@ -290,9 +305,9 @@ partition_statistics %>%
 
 ```{r ttest_ANOVA}
 #Generate t-scores
-
 gender_ttest <- t.test(loc_by_name ~ gender, partition_statistics)
-occupation_ttest <- t.test(loc_by_name ~ occupation, partition_statistics)
+occupation_ttest <-
+  t.test(loc_by_name ~ occupation, partition_statistics)
 
 #Create dataframes of tscores
 tscores <- map_df(list(gender_ttest, occupation_ttest), tidy)
@@ -307,11 +322,10 @@ anova_gender_occupation <-
 #Create dataframe for ANOVA score
 anovascore <- map_df(list(anova_gender_occupation), tidy)
 anovascore <- anovascore[c("statistic", "p.value")]
-
 ```
 
 T-tests of both gender and occupation individually affirms what visual inspection already suggests: that the mean distribution is not random.
-A Welch Two Sample t-test was done both on the difference in means of locations by gender (p = `r scientific(tscores[1,1],digits= 2)`) and the difference in means of locations by occupation (p = `r scientific(tscores[2,1],digits= 2)`)affirms what visual inspection already suggests: that the mean distribution is not random. At the same time, an analysis of variance (ANOVA) test reveals an F-score of `r round(anovascore[1,1],2)` and a p value of `r scientific(anovascore[1,2],digits= 2)`, indicating that the variance between means is greater than the variance within means and not random.
+A Welch Two Sample t-test was done both on the difference in means of locations by gender (p = `r scientific(tscores[1,1],digits= 2)`) and the difference in means of locations by occupation (p = `r scientific(tscores[2,1],digits= 2)`) both indicate a very low p-value. At the same time, an analysis of variance (ANOVA) test results in an F-score of `r round(anovascore[1,1],2)` and a p value of `r scientific(anovascore[1,2],digits= 2)`, indicating that the variance between means is greater than the variance within means and not random.
 
 ## Part 4: Spatial Analysis
 
@@ -323,6 +337,7 @@ The spatial analysis of the data set was done with QGIS. As these manipulations 
 
 ```{r departure_locations}
 #Departure locations
+
 part_from <- partition_statistics %>%
   mutate(migrated_from = str_extract(migrated_from, "[^,]+")) %>%
   drop_na(migrated_from) %>%
@@ -333,12 +348,11 @@ part_from <- partition_statistics %>%
   add_count(migrated_from, name = "loc_gender") %>%
   add_count(gender, name = "gender_tot") %>%
   mutate(percent = loc_gender / gender_tot) %>%
-  select(-PersonID,-loc_gender,-gender_tot) %>%
+  select(-PersonID, -loc_gender, -gender_tot) %>%
   distinct() %>%
-  #ungroup() %>%
   arrange(desc(total_location), gender) %>%
   top_n(5, total_location) %>%
-  mutate(percent = percent(percent,2)) %>%
+  mutate(percent = percent(percent, 2)) %>%
   select(-total_location)
 
 #Number of departure locations by gender
@@ -356,14 +370,15 @@ We can observe this diversity of points of departure by looking at a spatial rep
 ![Figure 2: Departure locations during Partition](images/poinst_of_departure.png)
 
 ```{r departure_locations_table, echo=FALSE}
-part_from %>% 
-  addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF"),pos.caption = "bottom") %>%
-  htmlTable(header = c(
-    "Migrated From",
-    "Gender",
-    "Percent departure by Gender"
-    
-  ),caption="Table 3: Top 5 Departure locations by gender")
+part_from %>%
+  addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF"),
+                    pos.caption = "bottom") %>%
+  htmlTable(
+    header = c("Migrated From",
+               "Gender",
+               "Percent departure by Gender"),
+    caption = "Table 5: Top 5 Departure locations by gender"
+  )
 
 ```
 
@@ -383,7 +398,7 @@ partition_transfer <- partition_statistics %>%
   #Remove all cases where the migrated from location is the same as one of the transit locations
   filter(migrated_from != resolved_location) %>%
   
-  #Remobe all cases where the resolved location equals migrated to.
+  #Remove all cases where the resolved location equals migrated to.
   filter(migrated_to != resolved_location) %>%
   
   #Get the number of transfer locations based on where people migrated from and their gender
@@ -392,37 +407,43 @@ partition_transfer <- partition_statistics %>%
   group_by(migrated_from, gender) %>%
   add_count(resolved_location, name = "migration_location", sort =
               TRUE) %>%
-  #Calcuate the percentage as a share of all migration locations
+  #Calculate the percentage as a share of all migration locations
   mutate(percent_transit = migration_location / total_gender) %>%
   
   #Clean up table for presentation
+  arrange(desc(percent_transit), resolved_location) %>%
   select(migrated_from,
          gender,
          resolved_location,
          migration_location,
          percent_transit) %>%
   distinct(migrated_from, resolved_location, percent_transit) %>%
-  arrange(desc(percent_transit), resolved_location) %>%
-  ungroup() %>%
-  top_n(10, percent_transit) %>%
+  group_by(gender) %>%
+  top_n(2, percent_transit) %>%
   mutate(percent_transit = percent(percent_transit, 2)) %>%
   relocate(gender, .before = migrated_from)
 ```
 
-Likewise the transit locations were also quite diverse. Amritsar occurs more frequently for both women (`r partition_transfer[1,4]`) and (`r partition_transfer[2,4]`), but does not stand out as the majority locations.
+Likewise the transit locations were also quite diverse. Amritsar occurs more frequently for both women (`r partition_transfer[1,4]`) and (`r partition_transfer[2,4]`), but does not stand out as a central location.
 
 ```{r departure_table}
 #Generate table
 partition_transfer %>%
-  addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF")) %>%
-  htmlTable(header = c(
-    "Gender",
-    "Migrated From",
-    "Transfer",
-    "Percent of Respondents Transfered"
-  ))
+  addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF"),
+                    pos.caption = "bottom") %>%
+  htmlTable(
+    header = c(
+      "Gender",
+      "Migrated From",
+      "Transfer",
+      "Percent of Respondents Transfered"
+    ),
+    caption = "Table 6: Top Transfer Locations by Gender"
+  )
 
 ```
+
+### Measuring departure distances
 
 
 The spatial analysis requires several manipulations of the data that were done in QGIS. What follows is a brief outline.
@@ -432,11 +453,11 @@ The spatial analysis requires several manipulations of the data that were done i
 
  - Subset the data into *from* hubs.
 ```{r from_hub}
-hub_from <- partition_statistics %>% 
-            select(migrated_from) %>% 
-            drop_na() %>% 
-            filter(migrated_from!="TBA") %>% 
-            distinct()
+hub_from <- partition_statistics %>%
+  select(migrated_from) %>%
+  drop_na() %>%
+  filter(migrated_from != "TBA") %>%
+  distinct()
 ```
 
 - Geocode each from hub.  
@@ -476,8 +497,17 @@ hub_from_join_clean <- read_csv("data/from_hubs_clean.csv")
 - Create line geometry for departure locations to Delhi.
 
 ```{r eval=FALSE}
-hub_from_join_clean <- hub_from_join_clean %>% 
-mutate(WKT = paste("LINESTRING(",long," ", lat, ",", "","77.2219388","28.6517178)")) 
+hub_from_join_clean <- hub_from_join_clean %>%
+  mutate(WKT = paste(
+    "LINESTRING(",
+    long,
+    " ",
+    lat,
+    ",",
+    "",
+    "77.2219388",
+    "28.6517178)"
+  ))
 write_csv(hub_from_join_clean, "data/hubs_to_delhi.csv") 
 ```
 
@@ -496,8 +526,8 @@ group_mean <- distance_to_border %>%
   summarise(grp_mean = mean(distance_km),
             group_median = median(distance_km))
 
-total_mean <- distance_to_border %>% 
-  ungroup() %>% 
+total_mean <- distance_to_border %>%
+  ungroup() %>%
   summarise(grp_mean = mean(distance_km))
 
 #Get percentage of people who traveled more than 100km
@@ -508,7 +538,7 @@ more_than_100 <- distance_to_border %>%
   distinct()
 ```
 
-The path of travel to the border was quite distant for the majority of interviewees. With men and women both traveling more than `r round(total_mean[1,1],0)`km on average, and the median distance also exceeding 100km (women = `r round(group_mean[1,3],0)`km, men = `r round(group_mean[2,3],0)`km). Even though it is a rather arbitrary distance, the majority of people (`r round(more_than_100[1,1]*100,0)`%) traveled more than 100km to get to the border. The sense that the majority interviewees travelled from quite far to even get to the border is also born out in the distribution of distances travelled. 
+The path of travel to the border was quite distant for the majority of interviewees. With men and women both traveling more than `r round(total_mean[1,1],0)`km on average, and the median distance also exceeding 100km (women = `r round(group_mean[1,3],0)`km, men = `r round(group_mean[2,3],0)`km). Even though it is a rather arbitrary distance, the majority of people (`r round(more_than_100[1,1]*100,0)`%) traveled more than 100km to get to the border. The sense that the majority interviewees traveled from quite far to even get to the border is also borne out in the distribution of distances traveled. 
 
 ```{r border_histogram, fig.cap="Figure 3: Distribution of Distance to Border"}
 distance_to_border %>%
@@ -526,7 +556,7 @@ distance_to_border %>%
        x = "Distance in km",
        y = "Count",
        fill = "Gender") +
-  facet_wrap(~ gender) +
+  facet_wrap( ~ gender) +
   theme_classic() +
   geom_vline(data = group_mean,
              aes(xintercept = grp_mean, color = gender),
@@ -545,14 +575,35 @@ distance_to_border %>%
 
 #### Analyzing Hub and Spokes Model
 
-Using QGIS it is possible to take all of the locations in each narrative and attach them to a central hub in this case Delhi.
+Using the same data set, `partition_statistics` it is possible to manually create a hub-and-spokes model by add a new column as a WKT LINESTRING and setting the end point to Delhi.
 
 
 ```{r generate_hub_spoke}
-to_hubs <- partition_statistics  %>% 
-  filter(resolved_location!="Delhi") %>% 
-mutate(WKT = paste("LINESTRING(",longitude," ", latitude, ",", "","77.2219388","28.6517178)"))  %>% 
-  select(name,age,gender,occupation,resolved_location,migrated_from,migrated_to,PersonID,loc_by_name,loc_total,WKT)
+to_hubs <- partition_statistics  %>%
+  filter(resolved_location != "Delhi") %>%
+  mutate(WKT = paste(
+    "LINESTRING(",
+    longitude,
+    " ",
+    latitude,
+    ",",
+    "",
+    "77.2219388",
+    "28.6517178)"
+  ))  %>%
+  select(
+    name,
+    age,
+    gender,
+    occupation,
+    resolved_location,
+    migrated_from,
+    migrated_to,
+    PersonID,
+    loc_by_name,
+    loc_total,
+    WKT
+  )
 write_csv(to_hubs, "data/hub_and_spoke.csv")
 ```
 
@@ -562,18 +613,20 @@ Visual inspection of the data reveals quite a diversity of locations mentioned. 
 ![Figure 4: Locations Mentioned in the Interviews](images/hub_and_spokes.png)
 
 
-At the more local level, it is interesting to note that the locations that are mentioned the most are those that were a transit point for refugees, such as the Kingsway Refugee Camp and the camp near Daryaganj, and those neighborhoods that were fundamentally shaped by Partition such as Karol Bagh and Lajpat Nagar. This tracks with the larger understanding of the impact of Partition on Delhi.
+At the more local level, it is interesting to note that the locations that are mentioned the most are those that were a transit point for refugees, such as the Kingsway Refugee Camp and the camp near Daryaganj. Also mentioned frequenty are those neighborhoods that were fundamentally shaped by Partition such as Karol Bagh and Lajpat Nagar. This tracks with the larger understanding of the impact of Partition on Delhi.
 
 ![Figure 5: Locations Mentioned in Delhi-NCR](images/delhi_ncr.png)
 
 
 #### Spatial Statistics
 
+QGIS can calculate the individual line lengths of the hub-and-spokes model. Getting this measurement is key to understanding the mental distances each narrative traverses.
+
+
 - Import spoke distances calculated in QGIS
 
 ```{r import_hub_spokes}
 spoke_distance <- read_csv("data/hub_spoke_distance.csv")
-
 ```
 
 - Calculate total spoke distance for each person.
@@ -585,8 +638,63 @@ distance_spokes_total <- spoke_distance %>%
   group_by(name, age) %>%
   mutate(total = round(sum(distance_km))) %>%
   distinct(name, gender, occupation, total)
+
+distance_spokes_summary <- distance_spokes_total %>% 
+  ungroup() %>%
+  summarise(
+    min = min(total),
+    #Important the quantile function result has to be converted to a character, because the number does not play nice with htmlTable
+    Q1 = as.character(quantile(total, .25)),
+    median = median(total),
+    Q3 = as.character(quantile(total, .75)),
+    max = max(total),
+    mean = round(mean(total), 0)
+  ) %>%
+  relocate(mean, .before = Q3) %>%
+  #mean has to be called last because it messes with the resulting values when this is called early on. Everything else becomes mean.
+  add_column(value = "Total distance", .before = "min")
+
+
+distance_spokes_mean <- spoke_distance %>%
+  filter(migrated_from != "TBA") %>%
+  select(name, age, gender, occupation, PersonID, distance_km) %>%
+  group_by(name, age) %>%
+  mutate(mean = round(mean(distance_km))) %>%
+  distinct(name, gender, occupation, mean) %>%
+  ungroup() %>%
+  summarise(
+    min = min(mean),
+    Q1 = as.character(quantile(mean, .25)),
+    median = median(mean),
+    Q3 = as.character(quantile(mean, .75)),
+    max = max(mean),
+    mean = round(mean(mean), 0)
+  ) %>%
+  relocate(mean, .before = Q3) %>%
+  add_column(value = "Mean distance", .before = "min")
+
+distribution_table <- distance_spokes_summary %>%
+  bind_rows(distance_spokes_mean)
+
+
 ``` 
 
+#### Summary Statistics 
+
+Basic summary statistics indicate a large gap between mean and median indicating a long tail in the distribution. 
+
+```{r}
+distribution_table %>%
+  addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF"),
+                    pos.caption = "bottom") %>%
+  htmlTable(
+    header = c("Value", "Min.", "1st Qu.", "Median", "Mean", "3rd Qu.", "Max"),
+    caption = "Table 8: Distribution of Total and Mean distance"
+  )
+```
+
+
+This is also visible in the histogram of the total distances.
 
 ```{r histogram_total_distance, fig.cap="Figure 5: Distribution of Total Spoke Length"}
 distance_spokes_total %>%
@@ -594,7 +702,6 @@ distance_spokes_total %>%
   ggplot(aes(total, fill = gender)) +
   geom_histogram(
     color = "black",
-    opacity = .8 ,
     alpha = .4,
     position = "identity"
   ) +
@@ -604,93 +711,94 @@ distance_spokes_total %>%
        x = "Distance in km",
        y = "Count",
        fill = "Gender") +
-  facet_wrap(~ occupation) +
+  facet_wrap( ~ occupation) +
   theme_classic() 
-
 ```
 
 ```{r group_mean_table}
 spokes_mean <- spoke_distance %>%
   group_by(gender, occupation) %>%
-  summarise(grp_mean = round(mean(distance_km),0))
+  summarise(grp_mean = round(mean(distance_km), 0))
 
 spokes_mean %>%
-  addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF")) %>% 
-  htmlTable(header = c("Gender", "Occupation", "Mean Total Distance"))
+  addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF"),
+                    pos.caption = "bottom") %>%
+  htmlTable(
+    header = c("Gender", "Occupation", "Mean Total Distance"),
+    caption = "Table 7: Mean Total Distance by Gender and Occupation"
+  )
 ```
 
 
 #### Domestic and International Locations
 
-Another way to think of the difference between narrating the self is the number of "domestic" and "international" locations. To be sure, the notions of "domestic" and "international" are fluid in the context of Partition. After all, Pakistan and India were "domestic" locations before partition. Perhaps a better way to think of it is to conceive of locations that are inside or outside the South Asian Sub-continent.    
-Using a spatial join in QGIS, all locations that fell within the Sub-continent were labeled "Subcontinent" and all thouse outside were labelled "international." As all the operative narratives were in Bangladesh, India, and Pakistan, these were clubbed togetehr as "Subcontinent"
+Another way to think of the difference between narrating the self is the number of "domestic" and "international" locations. To be sure, the notions of "domestic" and "international" are fluid in the context of Partition. After all, Pakistan and India were "domestic" locations before partition. Perhaps a better way to think of it is to conceive of locations that are inside or outside the Indian subcontinent.    
+Using a spatial join in QGIS, all locations that fell within the subcontinent were labeled "Subcontinent" and all those outside were labeled "international." As all the operative narratives were in Bangladesh, India, and Pakistan, these were clubbed together as "Subcontinent." As a result, Sri Lanka was excluded from the subcontinent.  
 
 ```{r import_spokes_international}
 spokes_distance_world <- read_csv("data/hub_spoke_distance_international.csv")
 ```
 
-With all of the locations by inside and outside the subcontinent, two separate tables were created. One for all the people who mentioned a location outside of the subcontinent at least, irrespective of the fact that they may have mentioned a "domestic" location. Using the `anti_join` function, the values from this table were filtered out of the overall table. This created the domestic table. The counts of these two tables were taken seperately. They were then bound back together.
+With all of the locations tagged as either inside and outside the subcontinent, two separate tables were created. One for all the people who mentioned a location outside of the subcontinent at least once, irrespective of the fact that they may have mentioned a "domestic" location. Using the `anti_join` function, the values from this table were filtered out of the overall hub-and-spoke model. This created the domestic table. The counts of these two tables were taken separately. They were then bound back together.
 
 
 ```{r spokes_world}
-spokes_international <- spokes_distance_world %>% 
-                        filter(CNTRY_NAME=="International") %>% 
-                        distinct(PersonID, .keep_all= TRUE) 
-                       
+spokes_international <- spokes_distance_world %>%
+  filter(CNTRY_NAME == "International") %>%
+  distinct(PersonID, .keep_all = TRUE)
 
-                        
+spokes_domestic <-  spokes_distance_world %>%
+  filter(CNTRY_NAME == "Subcontinent") %>%
+  anti_join(spokes_international, by = "PersonID") %>%
+  distinct(PersonID, .keep_all = TRUE) %>%
+  group_by(gender, occupation, CNTRY_NAME) %>%
+  count(name = "total")
 
-spokes_domestic <-  spokes_distance_world %>% 
-                    filter(CNTRY_NAME=="Subcontinent") %>%   
-                    anti_join(spokes_international, by="PersonID") %>% 
-                      distinct(PersonID, .keep_all=TRUE) %>% 
-                       group_by(gender,occupation, CNTRY_NAME) %>% 
-                           count(name = "total")
+spokes_international_count <- spokes_international %>%
+  group_by(gender, occupation, CNTRY_NAME) %>%
+  count(name = "total")
 
-spokes_international_count <- spokes_international %>% 
-                            group_by(gender,occupation, CNTRY_NAME) %>% 
-                         count(name = "total")
-
-spokes_by_dom_int <- spokes_international_count %>% 
-                      bind_rows(spokes_domestic) 
-                      
-
+spokes_by_dom_int <- spokes_international_count %>%
+  bind_rows(spokes_domestic) 
 ```
 
-The table Subcontinent and International counts were filtered by Gender. The resulting tables were then used to tabulate the percentage of people who mention only subcontinent locations or international locations by occupation.
+The table Subcontinent and International counts were filtered by gender. The resulting tables were then used to tabulate the percentage of people who mention only subcontinent locations or international locations by occupation.
 
-
-```{r}
-women_dom_int <- spokes_by_dom_int %>% 
-                  filter(gender == "Female") %>% 
-                  select(occupation,CNTRY_NAME,total) %>% 
-                  ungroup() %>% 
-                   mutate(percent= percent(total/sum(total),2)) %>% 
-                    select(-gender) %>% 
-                    arrange(occupation)
-women_dom_int %>% 
-addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF")) %>% 
-htmlTable(
-          header = c("Occupation", "Region", "Total", "Percent"),
-          caption = "Women who mention domestic and international locations by occupation")
+```{r women_domestic_international}
+women_dom_int <- spokes_by_dom_int %>%
+  filter(gender == "Female") %>%
+  select(occupation, CNTRY_NAME, total) %>%
+  ungroup() %>%
+  mutate(percent = percent(total / sum(total), 2)) %>%
+  select(-gender) %>%
+  arrange(occupation)
+women_dom_int %>%
+  addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF"),
+                    pos.caption = "bottom") %>%
+  htmlTable(header = c("Occupation", "Region", "Total", "Percent"),
+            caption = "Table 9: Women who mention domestic and international locations by occupation")
 ```
 
 
 
-```{r }
-men_dom_int <- spokes_by_dom_int %>% 
-                  filter(gender == "Male") %>% 
-                  select(occupation,CNTRY_NAME,total) %>% 
-                  ungroup() %>% 
-                   mutate(percent= percent(total/sum(total),2)) %>% 
-                    select(-gender) %>% 
-                    arrange(occupation)
+```{r men_domestic_international}
+men_dom_int <- spokes_by_dom_int %>%
+  filter(gender == "Male") %>%
+  select(occupation, CNTRY_NAME, total) %>%
+  ungroup() %>%
+  mutate(percent = percent(total / sum(total), 2)) %>%
+  select(-gender) %>%
+  arrange(occupation)
 
-men_dom_int %>% 
-addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF")) %>% 
-htmlTable(
-          header = c("Occupation", "Region", "Total", "Percent"),
-          caption = "Men who mention domestic and international locations by occupation")
+men_dom_int %>%
+  addHtmlTableStyle(col.rgroup = c("none", "#F5FBFF"),
+                    pos.caption = "bottom") %>%
+  htmlTable(header = c("Occupation", "Region", "Total", "Percent"),
+            caption = "Table 10: Men who mention domestic and international locations by occupation")
 ```
 
-The results show that while the percentage of women who do not mention an occupation, but who do mention an international location is significantly higher than men who do not mention an occupation and mention an international location. Conversely, men who mention an international location tend to mention their occupation as well. 
+The contrast between the two tables is interesting. Women who do and do not mention an occupation are split fairly evenly in terms of mentioning an international location.  Conversely, men who mention an international location tend to mention their occupation as well. This suggests quite strongly that thinking outside of the subcontinent is related to occupation for men, but this is not necessarily the case for women. Indeed, some of the narratives suggest that women travelled abroad by dint of their husbands. Their lives and subsequent retellings were heavily modulated by who they married.
+
+## Conclusion
+
+Overall, the data and a close-reading of the accounts suggests that men are able to their memory of Partition "behind" and "away" through their occupation and spatial mobility. Meanwhile, women were not afforded this level of agency and their narratives have a tendency to be more local. Though, in truth, as a percentage of the interviewees who only spoke about local places this does not make a huge difference. The difference resides in the number of women who do not mention an occupation and only stay within the subcontinent for their narrative. These narratives tend to be focused on very local places and fewer places.
